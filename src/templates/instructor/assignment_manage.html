@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Coursework Management</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/head.css">
+    <style>
+        .main {
+            padding-top: 20px;
+        }
+
+        .main .wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .main .wrapper div {
+            flex: 1;
+        }
+
+        .main .wrapper .panel {
+            border-color: #BCE8F1;
+        }
+
+        .main .wrapper .panel h3 {
+            background-color: #D9EDF7;
+            color: #31708F;
+            text-align: center;
+        }
+
+        .main .wrapper .down {
+            margin-top: 30px;
+        }
+
+        .main .wrapper .down button {
+            width: 100%;
+            height: 46px;
+            font-size: 18px;
+        }
+
+        .ass-edit {
+            width: 500px;
+            max-height: 600px;
+        }
+        .ass-edit label {
+            text-align: right;
+            width: 130px;
+        }
+    </style>
+</head>
+<body>
+{% include 'common/instructor_head.html' %}
+<div class="main">
+    <div class="wrapper">
+        <div>
+            <div class="up">
+                <div class="ass-mange panel">
+                    <h3 class="panel-title"><span id="course-name" course_id="{{course_id}}" style="font-weight: bold;">{{ course_name }}</span>-Coursework
+                        Management</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Deadline</th>
+                                <th>Created Time</th>
+                                <th>Operation</th>
+                            </tr>
+                            </thead>
+                            <tbody id="assignment-list">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                        <ul class="pagination" id="assignment-list-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="down">
+                <button type="button" class="btn" id="assignment-add">Add Coursework</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrap-dialog hide" id="ass-edit-dialog">
+        <div class="ass-edit dialog">
+            <div class="dialog-body">
+                <form class="assignment-form" id="assignment-form">
+                    <div class="input-box">
+                        <label class="input-box-label" for="assignment-name">Coursework Title</label><span
+                            class="input-box-span"><input
+                            class="input-box-span-input" type="text" id="assignment-name"
+                            placeholder="Place Enter the Coursework Title..."
+                            name="assignment_name"></span>
+                    </div>
+                    <div class="input-box content-box">
+                        <label class="input-box-label" for="assignment-requirement">Description</label><span
+                            class="input-box-span content-box-span"><textarea
+                            class="input-box-span-input" id="assignment-requirement"
+                            placeholder="Place Enter the Description..."
+                            name="assignment_requirement"></textarea></span>
+                    </div>
+                    <div class="input-box">
+                        <label class="input-box-label" for="submit-deadline-time">Deadline</label><span
+                            class="input-box-span"><input
+                            class="input-box-span-input" type="datetime-local" id="submit-deadline-time"
+                            placeholder="yy-mm-dd h:min"
+                            name="submit_deadline_time"></span>
+                    </div>
+                    <div class="input-box file-box">
+                        <label class="input-box-label" for="upload_file">相关文件</label>
+                        <span class="input-box-span file-box-span">
+                            <input type="file" class="input-box-span-input" id="upload_file" name="upload_file">
+                            <button type="button" class="btn" id="upload-file">上传</button>
+                            <div class="preview">
+
+                            </div>
+                        </span>
+                    </div>
+                    <input type="hidden" id="assignment-id" name="assignment_id">
+                    <input id="file_name" type="hidden" name="file_name">
+                </form>
+            </div>
+            <div class="dialog-footer">
+                <input type="button" class="btn submit" id="assignment-submit" value="提交"/>
+                <input type="button" class="btn cancel" value="关闭"/>
+            </div>
+        </div>
+    </div>
+    {% include 'common/change_password.html' %}
+    {% include 'common/pop_message.html' %}
+</div>
+<script src="/static/jquery-3.7.1.min.js"></script>
+<script src="/static/change_pwd.js"></script>
+<script src="/static/js/upload_file.js"></script>
+<script>
+    $(document).ready(function () {
+        assignmentList(1, $('#course-name').attr('course_id'))
+        // 切换页码
+        $('#assignment-list-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            assignmentList($(this).attr('page'), $('#course-name').attr('course_id'));
+        });
+
+        // 打开修改窗口
+        $('#assignment-list').on('click', 'button.btn-success', function () {
+            $('#upload_file').val('');
+            $('#ass-edit-dialog').removeClass('hide');
+            $('#assignment-submit').attr('operation', 'update');
+            assignment($(this).attr('id_val'));
+        });
+
+        // 删除
+        $('#assignment-list').on('click', 'button.btn-danger', function () {
+            var id = $(this).attr('id_val');
+            console.log(id)
+            assignmentDelete(id);
+        })
+
+        // 打开添加窗口
+        $('#assignment-add').on('click', function () {
+            $('#ass-edit-dialog').removeClass('hide');
+            $('#assignment-form input').val('');
+            $('#assignment-requirement').val('');
+            $('.preview').empty();
+            $('#assignment-submit').attr('operation', 'add');
+        })
+
+        $('#assignment-submit').on('click', function () {
+            var operation = $(this).attr('operation');
+            if (operation === 'add') {
+                // 添加
+                assignmentAdd();
+            } else {
+                // 修改
+                assignmentUpdate();
+            }
+        })
+
+        // 搜索
+        $('#search').on('click', function () {
+            assignmentList(1, $('#course-name').attr('course_id'))
+        });
+
+        $('#ass-edit-dialog .cancel').click(function () {
+            $('#ass-edit-dialog').addClass("hide");
+        });
+
+        // 关闭提示框
+        $('.close').click(function () {
+            $('#pop-message-dialog').addClass('hide');
+        });
+
+    });
+
+    // 作业列表分页查询
+    function assignmentList(page, course_id) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/assignment/list',
+            type: 'GET',
+            data: {'page': page, 'page_size': 3, 'course_id': course_id, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var assignmentList = response.data['assignment_list'];
+                    var pages = response.data['pages'];
+                    // 更新列表
+                    var data_html = '';
+                    for (var i = 0; i < assignmentList.length; i++) {
+                        var ass = assignmentList[i];
+                        data_html += '<tr>\n' +
+                            '<th scope="row">' + (i + 1) + '</th>\n' +
+                            '<td>' + ass.assignment_name + '</td>\n' +
+                            '<td>' + ((ass.assignment_requirement.length > 20) ? ass.assignment_requirement.substring(0, 20) + '...' : ass.assignment_requirement) + '</td>\n' +
+                            '<td>' + ass.submit_deadline_time + '</td>\n' +
+                            '<td>' + ass.create_time + '</td>\n' +
+                            '<td>\n' +
+                            '    <button class="btn btn-success" id_val="' + ass.id + '">Edit</button>\n' +
+                            '    <button class="btn btn-danger" id_val="' + ass.id + '">Delete</button>\n' +
+                            '</td>\n' +
+                            '</tr>';
+                    }
+                    $('#assignment-list').html(data_html);
+                    // 更新分页控制
+                    $('#assignment-list-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#assignment-list-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prev()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#assignment-list-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#assignment-list-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#assignment-list-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:next()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("Query Failure")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    function prev() {
+        var page = $('#assignment-list-page .active').attr('page');
+        assignmentList(parseInt(page) - 1, $('#course-name').attr('course_id'));
+    }
+
+    function next() {
+        var page = $('#assignment-list-page .active').attr('page');
+        assignmentList(parseInt(page) + 1, $('#course-name').attr('course_id'));
+    }
+
+    // 删除作业
+    function assignmentDelete(id) {
+        $.ajax({
+            url: '/assignment/delete',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({'id': id}),
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    assignmentList(1, $('#course-name').attr('course_id'))
+                } else {
+                    $('#pop-message-dialog p').text(response.msg);
+                    $('#pop-message-dialog').removeClass("hide");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    // 添加作业
+    function assignmentAdd() {
+        course_id = $('#course-name').attr('course_id');
+        var assignment_name = $('#assignment-name').val();
+        var assignment_requirement = $('#assignment-requirement').val();
+        var submit_deadline_time = $('#submit-deadline-time').val();
+        var file_name = $('#file_name').val();
+        console.log(assignment_name, assignment_requirement, submit_deadline_time, file_name)
+        if (assignment_name === '' || assignment_requirement === '' || submit_deadline_time === '' || file_name === '') {
+            $('#pop-message-dialog p').text("Please enter the full information");
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        if (new Date() > new Date(submit_deadline_time)) {
+            $('#pop-message-dialog p').text("The deadline cannot be earlier than the current time.");
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        $.ajax({
+            url: '/assignment/add',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                'course_id': course_id,
+                'assignment_name': assignment_name,
+                'assignment_requirement': assignment_requirement,
+                'submit_deadline_time': submit_deadline_time,
+                'file_name': file_name
+            }),
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    $('#ass-edit-dialog').addClass("hide");
+                    assignmentList(1, course_id)
+                } else {
+                    $('#pop-message-dialog p').text(response.msg);
+                    $('#pop-message-dialog').removeClass("hide");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    // 修改作业
+    function assignmentUpdate() {
+        var id = $('#assignment-id').val();
+        var assignment_name = $('#assignment-name').val();
+        var assignment_requirement = $('#assignment-requirement').val();
+        var submit_deadline_time = $('#submit-deadline-time').val();
+        var file_name = $('#file_name').val();
+        if (assignment_name === '' || assignment_requirement === '' || submit_deadline_time === '' || file_name === '') {
+            $('#pop-message-dialog p').text("Please enter the full information");
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        if (new Date() > new Date(submit_deadline_time)) {
+            $('#pop-message-dialog p').text("The deadline cannot be earlier than the current time.");
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        $.ajax({
+            url: '/assignment/update',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                'id': id,
+                'assignment_name': assignment_name,
+                'assignment_requirement': assignment_requirement,
+                'submit_deadline_time': submit_deadline_time,
+                'file_name': file_name
+            }),
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    $('#ass-edit-dialog').addClass("hide");
+                    assignmentList(1, $('#course-name').attr('course_id'))
+                } else {
+                    $('#pop-message-dialog p').text(response.msg);
+                    $('#pop-message-dialog').removeClass("hide");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    // 作业编辑数据回显
+    function assignment(id) {
+        $.ajax({
+            url: '/assignment/get',
+            type: 'GET',
+            data: {'id': id},
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    var assignment = response.data['assignment'];
+                    $('#assignment-id').val(assignment.id)
+                    $('#assignment-name').val(assignment.assignment_name);
+                    $('#assignment-requirement').val(assignment.assignment_requirement);
+                    $('#submit-deadline-time').val(assignment.submit_deadline_time);
+                    $('#file_name').val(assignment.file_name)
+                    $('.preview').empty()
+                    if (assignment.file_name !== null && assignment.file_name !== '' && assignment.file_name !== undefined && assignment.file_name !== 'null') {
+                        var imgs = ['png', 'jpg', 'jpeg'];
+                        if (imgs.includes(assignment.file_name.split('.')[1])) {
+                            $('.preview').append(`<img src="http://127.0.0.1:8080/static/uploads/${assignment.file_name}" alt="Preview" width="100%" height="100%">`)
+                        } else if ('pdf' === assignment.file_name.split('.')[1]) {
+                            $('.preview').append(`<embed src="http://127.0.0.1:8080/static/uploads/${assignment.file_name}" width="100%" height="100%" type="application/pdf">`)
+                        } else {
+                            $('.preview').append(`<iframe src="http://127.0.0.1:8080/static/uploads/${assignment.file_name}" width="100%" height="100%"></iframe>`)
+                        }
+                    }
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

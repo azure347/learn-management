@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Connection with the Students Page</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/head.css">
+    <link rel="stylesheet" href="/static/css/contact.css">
+    <style>
+        .main {
+            padding-top: 20px;
+        }
+
+        .main .wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+
+    </style>
+</head>
+<body>
+{% include 'common/instructor_head.html' %}
+<div class="main">
+    <div class="wrapper">
+        {% include 'common/contact.html' %}
+    </div>
+    {% include 'common/change_password.html' %}
+    {% include 'common/pop_message.html' %}
+</div>
+<script src="/static/jquery-3.7.1.min.js"></script>
+<script src="/static/change_pwd.js"></script>
+<script>
+    $(document).ready(function () {
+        // 每隔一定时间获取最新消息
+        setInterval(list, 1000);
+
+        $('#search-form').hide();
+
+        // 发送消息
+        $('#send').click(function () {
+            var receive_id = $('#receive-id').val();
+            var message = $('#message').val();
+            if (message === null || message.trim() === '') {
+                $('#pop-message-dialog p').text('The sending message cannot be empty.');
+                $('#pop-message-dialog').removeClass("hide");
+                return;
+            }
+            $.ajax({
+                url: '/message/send',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({'receive_id': receive_id, 'message': message}),
+                success: function (response) {
+                    if (response.code === 200) {
+                        list()
+                        $('#message').val('');
+                    } else {
+                        $('#pop-message-dialog p').text(response.msg);
+                        $('#pop-message-dialog').removeClass("hide");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Request failed: ', status, error);
+                }
+            })
+        })
+    });
+
+    // 获取聊天记录
+    function list() {
+        receive_id = $('#receive-id').val()
+        $.ajax({
+            url: '/message/list',
+            type: 'GET',
+            data: {'receive_id': receive_id},
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    var msgList = response.data['message_list'];
+                    // 更新列表
+                    var data_html = '';
+                    for (var i = 0; i < msgList.length; i++) {
+                        var msg = msgList[i];
+                        if (msg.send_id === parseInt(receive_id)) {
+                            data_html += '<li>\n' +
+                                '<div class="left-div">\n' +
+                                '<span class="chat-message">' + msg.message_content + '</span>\n' +
+                                '</div>\n' +
+                                '<div class="center-div">\n' +
+                                '<span class="chat-message-time">' + msg.create_time + '</span>\n' +
+                                '</div>\n' +
+                                '<div class="right-div">\n' +
+                                '<span></span>\n' +
+                                '</div>\n' +
+                                '</li>'
+                        } else {
+                            data_html += '<li>\n' +
+                                '                    <div class="left-div">\n' +
+                                '                        <span></span>\n' +
+                                '                    </div>\n' +
+                                '                    <div class="center-div">\n' +
+                                '                        <span class="chat-message-time">' + msg.create_time + '</span>\n' +
+                                '                    </div>\n' +
+                                '                    <div class="right-div">\n' +
+                                '                        <span class="chat-message">' + msg.message_content + '</span>\n' +
+                                '                    </div>\n' +
+                                '                </li>'
+                        }
+                    }
+                    $('#chat-list').html(data_html);
+                } else {
+                    console.log("Query Failure")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+</script>
+</body>
+</html>
+
+
+
+

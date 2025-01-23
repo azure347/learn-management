@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>通知管理</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/head.css">
+    <style>
+        .main {
+            padding-top: 20px;
+        }
+
+        .main .wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .main .wrapper div {
+            flex: 1;
+        }
+
+        .main .wrapper .panel {
+            border-color: #BCE8F1;
+        }
+
+        .main .wrapper .panel h3 {
+            background-color: #D9EDF7;
+            color: #31708F;
+            text-align: center;
+        }
+
+        .main .wrapper .down {
+            margin-top: 30px;
+        }
+
+        .main .wrapper .down button {
+            width: 100%;
+            height: 46px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+{% include 'common/admin_head.html' %}
+<div class="main">
+    <div class="wrapper">
+        <div>
+            <div class="up">
+                <div class="notice-edit panel">
+                    <h3 class="panel-title">通知管理</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>编号</th>
+                                <th>通知名称</th>
+                                <th>通知内容</th>
+                                <th>通知类型</th>
+                                <th>发起人</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="notice">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                        <ul class="pagination" id="notice-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="down">
+                <button type="button" class="btn" id="notice-add">添加通知</button>
+            </div>
+        </div>
+    </div>
+    {% include 'common/notice_edit.html' %}
+    {% include 'common/change_password.html' %}
+    {% include 'common/pop_message.html' %}
+</div>
+<script src="/static/jquery-3.7.1.min.js"></script>
+<script src="/static/change_pwd.js"></script>
+<script src="/static/js/upload_file.js"></script>
+<script>
+    $(document).ready(function () {
+        noticelist(1)
+        getAllUser()
+        // 切换页码
+        $('#notice-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            noticelist($(this).attr('page'));
+        });
+
+        // 打开修改通知窗口
+        $('#notice').on('click', 'button.btn-success', function () {
+            $('#all-user input').each(function () {
+                $(this).prop('checked', false);
+            });
+            $('#upload_file').val('');
+            $('#notice-edit-dialog').removeClass('hide');
+            $('#notice-submit').attr('operation', 'update');
+            notice($(this).attr('id_val'));
+        });
+
+        // 删除通知
+        $('#notice').on('click', 'button.btn-danger', function () {
+            var id = $(this).attr('id_val');
+            console.log(id)
+            noticeDelete(id);
+        })
+
+        // 打开添加通知窗口
+        $('#notice-add').on('click', function () {
+            getAllUser();
+            $('#notice-edit-dialog').removeClass('hide');
+            $('#notice-form input').val('');
+            $('#notice_content').val('');
+            $('.preview').empty();
+            $('#notice-submit').attr('operation', 'add');
+        })
+
+        $('#notice-submit').on('click', function () {
+            var operation = $(this).attr('operation');
+            if (operation === 'add') {
+                // 添加通知
+                noticeAdd();
+            } else {
+                // 修改通知
+                noticeUpdate();
+            }
+            $('#notice-edit-dialog').addClass('hide');
+        })
+
+        // 搜索
+        $('#search').on('click', function () {
+            noticelist(1)
+        });
+
+        $('#notice-edit-dialog .cancel').click(function () {
+            $('#notice-edit-dialog').addClass("hide");
+        });
+
+        // 关闭提示框
+        $('.close').click(function () {
+            $('#pop-message-dialog').addClass('hide');
+        });
+    });
+
+    // 通知列表分页查询
+    function noticelist(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/notice/all',
+            type: 'GET',
+            data: {'page': page, 'page_size': 3, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var noticeList = response.data['notice_list'];
+                    var pages = response.data['pages'];
+                    console.log(noticeList)
+                    console.log(pages)
+                    // 更新通知列表
+                    var data_html = '';
+                    for (var i = 0; i < noticeList.length; i++) {
+                        var notice = noticeList[i];
+                        data_html += '<tr>\n' +
+                            '<th scope="row">' + (i + 1) + '</th>\n' +
+                            '<td>' + notice.notice_name + '</td>\n' +
+                            '<td>' + ((notice.notice_content.length > 20) ? notice.notice_content.substring(0, 20) + '...' : notice.notice_content) + '</td>\n' +
+                            '<td>' + ((notice.type === 1) ? "公共通知" : "专属通知") + '</td>\n' +
+                            '<td>' + notice.username + '</td>\n' +
+                            '<td>' + notice.create_time + '</td>\n' +
+                            '<td>\n' +
+                            '    <button class="btn btn-success" id_val="' + notice.id + '">修改</button>\n' +
+                            '    <button class="btn btn-danger" id_val="' + notice.id + '">删除</button>\n' +
+                            '</td>\n' +
+                            '</tr>';
+                    }
+                    $('#notice').html(data_html);
+                    // 更新分页控制
+                    $('#notice-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#notice-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevNt()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#notice-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#notice-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#notice-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextNt()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("查询失败")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    function prevNt() {
+        var page = $('#notice-page .active').attr('page');
+        noticelist(parseInt(page) - 1);
+    }
+
+    function nextNt() {
+        var page = $('#notice-page .active').attr('page')
+        noticelist(parseInt(page) + 1);
+    }
+
+    // 删除通知
+    function noticeDelete(id) {
+        $.ajax({
+            url: '/notice/delete',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({'id': id}),
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    noticelist(1)
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    // 添加通知
+    function noticeAdd() {
+        var user_list = [];
+        $('#all-user input[type="checkbox"]:checked').each(function () {
+            user_list.push($(this).val());
+        });
+        var notice_name = $('#notice_name').val();
+        var notice_content = $('#notice_content').val();
+        var file_name = $('#file_name').val();
+        var notice_type = 1;
+        if (user_list.length > 0) {
+            notice_type = 2;
+        }
+        $.ajax({
+            url: '/notice/add',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                'notice_name': notice_name,
+                'notice_content': notice_content,
+                'file_name': file_name,
+                'notice_type': notice_type,
+                'user_list': user_list
+            }),
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    noticelist(1)
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    // 修改通知
+    function noticeUpdate() {
+        var user_list = [];
+        $('#all-user input[type="checkbox"]:checked').each(function () {
+            user_list.push($(this).val());
+        });
+        var notice_id = $('#notice_id').val();
+        var notice_name = $('#notice_name').val();
+        var notice_content = $('#notice_content').val();
+        var file_name = $('#file_name').val();
+        var notice_type = 1;
+        if (user_list.length > 0) {
+            notice_type = 2;
+        }
+        $.ajax({
+            url: '/notice/update',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                'id': notice_id,
+                'notice_name': notice_name,
+                'notice_content': notice_content,
+                'file_name': file_name,
+                'notice_type': notice_type,
+                'user_list': user_list
+            }),
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    noticelist(1)
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    // 获取用户列表
+    function getAllUser() {
+        $.ajax({
+            url: '/user/all',
+            type: 'GET',
+            success: function (response) {
+                if (response.code === 200) {
+                    var userList = response.data['users'];
+                    //console.log(userList)
+                    var data_html = '';
+                    for (var i = 0; i < userList.length; i++) {
+                        var user = userList[i];
+                        data_html += '<tr>\n' +
+                            '    <td>' + (i + 1) + '</td>\n' +
+                            '    <td>' + user.username + '</td>\n' +
+                            '    <td><input type="checkbox" name="ck' + i + '" value="' + user.id + '"></td>\n' +
+                            '</tr>'
+                    }
+                    $('#all-user').html(data_html);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    // 通知编辑数据回显
+    function notice(id) {
+        $.ajax({
+            url: '/notice/get',
+            type: 'GET',
+            data: {'id': id},
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    var notice = response.data['notice'];
+                    var user_ids = response.data['user_ids'];
+                    console.log("notice: ", notice, "user_ids: ", user_ids)
+                    $('#notice_id').val(notice.id)
+                    $('#notice_name').val(notice.notice_name);
+                    $('#notice_content').val(notice.notice_content);
+                    $('#file_name').val(notice.file_name)
+                    // 预览
+                    console.log("-----------------------", notice.file_name)
+                    $('.preview').empty()
+                    if (notice.file_name !== null && notice.file_name !== '' && notice.file_name !== undefined && notice.file_name !== 'null') {
+                        var imgs = ['png', 'jpg', 'jpeg'];
+                        if (imgs.includes(notice.file_name.split('.')[1])) {
+                            $('.preview').append(`<img src="http://127.0.0.1:8080/static/uploads/${notice.file_name}" alt="Preview" width="100%" height="100%">`)
+                        } else if ('pdf' === notice.file_name.split('.')[1]) {
+                            $('.preview').append(`<embed src="http://127.0.0.1:8080/static/uploads/${notice.file_name}" width="100%" height="100%" type="application/pdf">`)
+                        } else {
+                            $('.preview').append(`<iframe src="http://127.0.0.1:8080/static/uploads/${notice.file_name}" width="100%" height="100%"></iframe>`)
+                        }
+                    }
+                    if (notice.type === 2) {
+                        $('#all-user input').each(function () {
+                            id = parseInt($(this).val())
+                            if (user_ids.includes(id)) {
+                                $(this).prop('checked', true)
+                            }
+                        });
+                    }
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

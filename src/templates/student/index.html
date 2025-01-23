@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Homepage</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/head.css">
+    <style>
+        .main {
+            padding-top: 20px;
+        }
+
+        .main .wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .main .wrapper .left {
+            flex: 3;
+
+        }
+
+        .main .wrapper .center {
+            flex: 6;
+            margin: 0 20px;
+        }
+
+        .main .wrapper .right {
+            flex: 3;
+        }
+
+        .main .wrapper .left .up {
+            margin-bottom: 30px;
+        }
+
+        .my-course {
+            border-color: #BCE8F1;
+        }
+
+        .my-course h3 {
+            background-color: #D9EDF7;
+            color: #31708F;
+            text-align: center;
+        }
+
+        .work-deadline {
+            border-color: #EBCCD1;
+        }
+
+        .work-deadline h3 {
+            background-color: #F2DEDE;
+            color: #B04442;
+            text-align: center;
+        }
+
+        .my-notice h3 {
+            text-align: center;
+        }
+
+        .notice-content ul {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .notice-content li {
+            width: 210px;
+            height: 340px;
+            border: 1px solid #ddd;
+            padding: 0 5px;
+        }
+
+        .notice-content li .pic {
+            width: 200px;
+            height: 200px;
+        }
+
+        .notice-content .text {
+            padding: 10px;
+            height: 130px;
+        }
+
+        .notice-content .text h4 {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .notice-content .text p:last-child {
+            margin-top: 10px;
+        }
+
+        .forum {
+            margin-top: 30px;
+            border-color: #BCE8F1;
+        }
+
+        .forum h3 {
+            background-color: #D9EDF7;
+            color: #31708F;
+        }
+
+        .forum .panel-body {
+            padding: 0;
+        }
+
+        .forum .forum-header {
+            height: 80px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .forum .forum-header h1 {
+            height: 80px;
+            line-height: 80px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .forum .forum-content li {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .forum .forum-content .message-content {
+            flex: 2;
+        }
+
+        .forum .forum-content .userinfo {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            margin-left: 10px;
+        }
+
+        .forum .forum-content .userinfo .username {
+            color: #337ab7;
+        }
+
+        .forum .forum-content .userinfo .time {
+            background-color: #777;
+            height: 18px;
+            padding: 3px;
+            color: #fff;
+            font-size: 10px;
+            border-radius: 4px;
+        }
+
+        .forum form {
+            padding: 10px 50px;
+        }
+
+        .forum form span {
+            display: block;
+            height: 80px;
+        }
+        .forum form button {
+            position: relative;
+            left: 89%;
+        }
+
+        .unstarted-course {
+            border-color: #BCE8F1;
+        }
+
+        .unstarted-course h3 {
+            background-color: #D9EDF7;
+            color: #31708F;
+            text-align: center;
+        }
+
+        .right .down {
+            margin-top: 30px;
+        }
+
+        .right .down button {
+            width: 100%;
+            height: 46px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+{% include 'common/student_head.html' %}
+<div class="main">
+    <div class="wrapper">
+        <div class="left">
+            <div class="up">
+                <div class="my-course panel">
+                    <h3 class="panel-title">My Course</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Instructor</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Operation</th>
+                            </tr>
+                            </thead>
+                            <tbody id="my-course">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                        <ul class="pagination" id="my-course-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="down">
+                <div class="work-deadline panel">
+                    <h3 class="panel-title">Coursework Deadline Reminder</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Course Name</th>
+                                <th>CW Name</th>
+                                <th>Deadline</th>
+                            </tr>
+                            </thead>
+                            <tbody id="unfinished-homework">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                        <ul class="pagination" id="unfinished-homework-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="center">
+            <div class="up">
+                <div class="my-notice panel">
+                    <h3 class="panel-title">My Notice</h3>
+                    <div class="panel-body">
+                        <div class="notice-content">
+                            <!-- 公告数据 -->
+                            <ul id="notice">
+                                <!-- 公告列表 -->
+                            </ul>
+                        </div>
+                        <ul class="pagination" id="notice-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="down">
+                <div class="forum panel">
+                    <h3 class="panel-title">Forum</h3>
+                    <div class="panel-body">
+                        <div class="forum-header">
+                            <h1>Discussion</h1>
+                        </div>
+                        <div class="forum-content">
+                            <ul id="message-board">
+                                <!-- 留言板列表 -->
+                            </ul>
+                        </div>
+                        <ul class="pagination" id="message-board-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                        <form>
+                            <span class="input-box-span content-box-span"><textarea class="input-box-span-input"
+                                                                                    id="content"
+                                                                                    placeholder="Please enter the text..."
+                                                                                    name="content"></textarea></span>
+                            <button type="button" class="btn btn-default" id="send">Send</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right">
+            <div class="up">
+                <div class="unstarted-course panel">
+                    <h3 class="panel-title">Optional Course</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Instructor</th>
+                                <th>From</th>
+                                <th>To</th>
+                            </tr>
+                            </thead>
+                            <tbody id="no-start-course">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                        <ul class="pagination" id="no-start-course-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="down">
+                <button type="button" class="btn" id="choose-course">Choose Course</button>
+            </div>
+        </div>
+    </div>
+    {% include 'common/change_password.html' %}
+    {% include 'common/pop_message.html' %}
+</div>
+<script src="/static/jquery-3.7.1.min.js"></script>
+<script src="/static/change_pwd.js"></script>
+<script>
+    $(document).ready(function () {
+        myCourseList(1)
+        unfinishedHomeworkDate(1);
+        noticelist(1)
+        messageBoardList(1)
+        noStartCourse(1)
+        $('#my-course-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            myCourseList($(this).attr('page'));
+        });
+        $('#unfinished-homework-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            unfinishedHomeworkDate($(this).attr('page'));
+        });
+        $('#notice-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            noticelist($(this).attr('page'));
+        });
+        $('#message-board-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            messageBoardList($(this).attr('page'));
+        });
+        $('#no-start-course-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            noStartCourse($(this).attr('page'));
+        });
+
+        $('#choose-course').click(function () {
+            window.location.href = '/user/student/course-request';
+        });
+
+        // 发送留言
+        $('#send').click(function () {
+            var message = $('#content').val();
+            if (message === null || message.trim() === '') {
+                $('#pop-message-dialog p').text('The sending message cannot be empty.');
+                $('#pop-message-dialog').removeClass("hide");
+                return;
+            }
+            $.ajax({
+                url: '/message-board/add',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({'message_content': message}),
+                success: function (response) {
+                    if (response.code === 200) {
+                        messageBoardList(1)
+                        $('#content').val('');
+                    } else {
+                        $('#pop-message-dialog p').text(response.msg);
+                        $('#pop-message-dialog').removeClass("hide");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Request failed: ', status, error);
+                }
+            })
+        })
+
+        // 删除留言
+        $('#message-board').on('click', 'a.del-msg', function () {
+            console.log($(this).attr('mb_id'))
+            var mb_id = $(this).attr('mb_id');
+            $.ajax({
+                url: '/message-board/delete',
+                type: 'GET',
+                data: {'id': mb_id},
+                success: function (response) {
+                    console.log(response)
+                    if (response.code === 200) {
+                        messageBoardList(1)
+                    } else {
+                        $('#pop-message-dialog p').text(response.msg);
+                        $('#pop-message-dialog').removeClass("hide");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Request failed: ', status, error);
+                }
+            });
+        })
+
+        // 搜索
+        $('#search').on('click', function () {
+            myCourseList(1)
+            unfinishedHomeworkDate(1);
+            noticelist(1)
+            messageBoardList(1)
+            noStartCourse(1)
+        });
+
+        // 关闭提示框
+        $('.close').click(function () {
+            $('#pop-message-dialog').addClass('hide');
+        });
+
+    });
+
+    function myCourseList(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/student-course/by-student-id',
+            type: 'GET',
+            data: {'page': page, 'page_size': 2, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var courseList = response.data['course_list'];
+                    var pages = response.data['pages'];
+                    // 更新课程列表
+                    var data_html = '';
+                    for (var i = 0; i < courseList.length; i++) {
+                        var course = courseList[i];
+                        data_html += '<tr>' +
+                            '<th scope="row">' + (i + 1) + '</th>' +
+                            '<td>' + course.course_name + '</td>' +
+                            '<td>' + course.instructor_name + '</td>' +
+                            '<td>' + course.start_date + '</td>' +
+                            '<td>' + course.end_date + '</td>' +
+                            '<td><a class="btn btn-default" style="display: block;padding: 5px 0;" href="/user/student/course?course_id=' + course.course_id + '&course_name=' + course.course_name + '&instructor_id=' + course.instructor_id + '&instructor_name=' + course.instructor_name + '">View</a></td>' +
+                            '</tr>';
+                    }
+                    $('#my-course').html(data_html);
+                    // 更新分页控制
+                    $('#my-course-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#my-course-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevMc()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#my-course-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#my-course-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#my-course-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextMc()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("Query Failure")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    function prevMc() {
+        var page = $('#my-course-page .active').attr('page');
+        myCourseList(parseInt(page) - 1);
+    }
+
+    function nextMc() {
+        var page = $('#my-course-page .active').attr('page')
+        myCourseList(parseInt(page) + 1);
+    }
+
+
+    function unfinishedHomeworkDate(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/student-assignment/unfinished',
+            type: 'GET',
+            data: {'page': page, 'page_size': 2, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var assignmentList = response.data['assignment_list'];
+                    var pages = response.data['pages'];
+                    console.log(assignmentList)
+                    console.log(pages)
+                    // 更新课程列表
+                    var data_html = '';
+                    for (var i = 0; i < assignmentList.length; i++) {
+                        var ass = assignmentList[i];
+                        data_html += '<tr>' +
+                            '<th scope="row">' + (i + 1) + '</th>' +
+                            '<td>' + ass.course_name + '</td>' +
+                            '<td>' + ass.assignment_name + '</td>' +
+                            '<td>' + ass.submit_deadline_time + '</td>' +
+                            '</tr>';
+                    }
+                    $('#unfinished-homework').html(data_html);
+                    // 更新分页控制
+                    $('#unfinished-homework-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#unfinished-homework-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevUh()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#unfinished-homework-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#unfinished-homework-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#unfinished-homework-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextUh()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("Query Failure")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    function prevUh() {
+        var page = $('#unfinished-homework-page .active').attr('page');
+        unfinishedHomeworkDate(parseInt(page) - 1);
+    }
+
+    function nextUh() {
+        var page = $('#unfinished-homework-page .active').attr('page')
+        unfinishedHomeworkDate(parseInt(page) + 1);
+    }
+
+    function noticelist(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/notice/list-by-user-receive',
+            type: 'GET',
+            data: {'page': page, 'page_size': 3, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var noticeList = response.data['notice_list'];
+                    var pages = response.data['pages'];
+                    console.log(noticeList)
+                    console.log(pages)
+                    // 更新通知列表
+                    var data_html = '';
+                    var imgs = ['png', 'jpg', 'jpeg'];
+                    for (var i = 0; i < noticeList.length; i++) {
+                        var notice = noticeList[i];
+                        console.log(imgs.includes(notice.file_name.split('.')[1]));
+                        data_html += '<li>\n' +
+                            '                                    <div class="pic">' + (imgs.includes(notice.file_name.split('.')[1]) ? '<img src="http://127.0.0.1:8080/static/uploads/' + notice.file_name + '" style="height: 100%; width: 100%;">' : '<iframe src="http://127.0.0.1:8080/static/uploads/' + notice.file_name + '" style="height: 100%; width: 100%;"></iframe>') + '</div>\n' +
+                            '                                    <div class="text">\n' +
+                            '                                        <h4>' + ((notice.notice_name.length > 8) ? notice.notice_name.substring(0, 10) + '...' : notice.notice_name) + '</h4>\n' +
+                            '                                        <p>' + ((notice.notice_content.length > 23) ? notice.notice_content.substring(0, 23) + '...' : notice.notice_content) + '</p>\n' +
+                            '                                        <p>' + notice.username + '</p>\n' +
+                            '                                    </div>\n' +
+                            '                                </li>'
+                    }
+                    $('#notice').html(data_html);
+                    // 更新分页控制
+                    $('#notice-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#notice-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevNt()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#notice-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#notice-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#notice-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextNt()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("Query Failure")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    function prevNt() {
+        var page = $('#notice-page .active').attr('page');
+        noticelist(parseInt(page) - 1);
+    }
+
+    function nextNt() {
+        var page = $('#notice-page .active').attr('page')
+        noticelist(parseInt(page) + 1);
+    }
+
+    function messageBoardList(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/message-board/list',
+            type: 'GET',
+            data: {'page': page, 'page_size': 3, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var mbList = response.data['message_board_list'];
+                    var pages = response.data['pages'];
+                    console.log(mbList)
+                    console.log(pages)
+                    // 更新课程列表
+                    var stu_id = $('#stu').attr('stu_id');
+                    var data_html = '';
+                    for (var i = 0; i < mbList.length; i++) {
+                        var mb = mbList[i];
+                        data_html += '<li>\n' +
+                            '                                    <div class="message-content">\n' +
+                            '                                        <p>' + mb.message_content + '</p>\n' +
+                            '                                    </div>\n' +
+                            '                                    <div class="userinfo">\n' +
+                            '                                        <span class="username">' + mb.username + '</span>\n' + (mb.user_id === parseInt(stu_id) ? '<a href="#" mb_id="' + mb.id + '" style="font-size: 14px;color: #337ab7;" class="del-msg">Delete</a>' : '') +
+                            '                                        <span class="time">' + mb.update_time + '</span>\n' +
+                            '                                    </div>\n' +
+                            '                                </li>';
+                    }
+                    $('#message-board').html(data_html);
+                    // 更新分页控制
+                    $('#message-board-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#message-board-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevMb()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#message-board-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#message-board-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#message-board-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextMb()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("Query Failure")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    function prevMb() {
+        var page = $('#message-board-page .active').attr('page');
+        messageBoardList(parseInt(page) - 1);
+    }
+
+    function nextMb() {
+        var page = $('#message-board-page .active').attr('page')
+        messageBoardList(parseInt(page) + 1);
+    }
+
+    function noStartCourse(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/course/select',
+            type: 'GET',
+            data: {'page': page, 'page_size': 2, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var courseList = response.data['course_list'];
+                    var pages = response.data['pages'];
+                    console.log(courseList)
+                    console.log(pages)
+                    // 更新课程列表
+                    var data_html = '';
+                    for (var i = 0; i < courseList.length; i++) {
+                        var course = courseList[i];
+                        data_html += '<tr>' +
+                            '<th scope="row">' + (i + 1) + '</th>' +
+                            '<td>' + course.course_name + '</td>' +
+                            '<td>' + course.username + '</td>' +
+                            '<td>' + course.start_date + '</td>' +
+                            '<td>' + course.end_date + '</td>' +
+                            '</tr>';
+                    }
+                    $('#no-start-course').html(data_html);
+                    // 更新分页控制
+                    $('#no-start-course-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#no-start-course-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevNsc()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#no-start-course-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#no-start-course-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#no-start-course-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextNsc()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("Query Failure")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    function prevNsc() {
+        var page = $('#no-start-course-page .active').attr('page');
+        noStartCourse(parseInt(page) - 1);
+    }
+
+    function nextNsc() {
+        var page = $('#no-start-course-page .active').attr('page')
+        noStartCourse(parseInt(page) + 1);
+    }
+</script>
+</body>
+</html>

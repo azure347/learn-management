@@ -1,0 +1,22 @@
+<div class="left">
+    <button type="button" class="btn">{{ course_name }}</button>
+    <button type="button" class="btn">{{ contact_user_name }}</button>
+</div>
+<div class="right">
+    <div class="chat-box panel">
+        <h3 class="panel-title">Chat Frame</h3>
+        <div class="panel-body">
+            <ul id="chat-list">
+
+            </ul>
+            <form>
+                <input type="hidden" name="receive_id" value="{{ contact_user_id }}" id="receive-id">
+                <span class="input-box-span content-box-span"><textarea class="input-box-span-input"
+                                                                        id="message"
+                                                                        placeholder="Please enter the text..."
+                                                                        name="message"></textarea></span>
+                <button type="button" class="btn btn-default" id="send">Send</button>
+            </form>
+        </div>
+    </div>
+</div>

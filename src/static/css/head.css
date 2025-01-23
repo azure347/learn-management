@@ -1,0 +1,56 @@
+.header {
+    height: 50px;
+    background-color: #F8F8F8;
+    border-bottom: 1px solid #E7E7E7;
+}
+
+.header .wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+}
+
+.header .left h1 a {
+    display: block;
+    height: 50px;
+    line-height: 50px;
+    font-size: 18px;
+    color: #777;
+    font-weight: 400;
+}
+
+.header .center {
+    display: flex;
+    justify-content: space-between;
+}
+
+.header .center p {
+    color: #777;
+    margin:0 10px;
+}
+.header .center p a {
+    color: #337ab7;
+}
+.header .center p a:hover {
+    color: #23527C;
+    text-decoration: underline;
+}
+
+.header .right {
+    display: flex;
+    justify-content: right;
+    width: 380px;
+}
+
+.header .right .search {
+    display: flex;
+    width: 284px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header .right form:last-child span {
+    height: 100%;
+    margin-right: 10px;
+}

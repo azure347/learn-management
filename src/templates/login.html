@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Log In</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <style>
+        body {
+            background-color: #c1e2b3;
+        }
+
+        .main {
+            margin: 150px auto;
+            width: 590px;
+            height: 300px;
+        }
+
+        .main h1 {
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .login {
+            height: 260px;
+            border-color: #DFF0D8;
+        }
+
+        .login h3 {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+
+        .login form {
+            height: 220px;
+            padding: 20px 25px;
+        }
+
+        .role {
+            height: 30px;
+        }
+
+        .role label {
+            margin-right: 50px;
+        }
+
+        .login form button {
+            margin-left: 105px;
+        }
+
+        .error {
+            margin-left: 30px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<div class="main">
+    <h1>Learning Management System</h1>
+    <div class="login panel">
+        <h3 class="panel-title">Log In</h3>
+        <form action="" method="post">
+            <div class="role">
+                <input type="radio" name="role" id="radio1" value="student" checked> <label
+                    for="radio1">Students</label>
+                <input type="radio" name="role" id="radio2" value="instructor"><label for="radio2"> Instructors</label>
+                <input type="radio" name="role" id="radio3" value="admin"> <label for="radio3">Administrators</label>
+            </div>
+            <div class="input-box">
+                <label class="input-box-label" for="username">UserName</label><span class="input-box-span"><input
+                    class="input-box-span-input" type="text" id="username"
+                    placeholder="Enter the Users Name"
+                    name="username"></span>
+            </div>
+            <div class="input-box">
+                <label class="input-box-label" for="password">Password</label><span class="input-box-span"><input
+                    class="input-box-span-input" type="password" id="password"
+                    placeholder="Enter the Password"
+                    name="password"></span>
+            </div>
+            <button class="btn" type="submit">Log In</button>
+            <span class="error">{{error}}</span>
+        </form>
+    </div>
+</div>
+</body>
+</html>

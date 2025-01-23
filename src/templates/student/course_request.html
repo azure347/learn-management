@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学生选课页</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/head.css">
+    <style>
+        .main {
+            padding-top: 20px;
+        }
+
+        .main .wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .main .wrapper .left {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .left button {
+            width: 100%;
+            height: 46px;
+            font-size: 18px;
+        }
+
+        .main .wrapper .right {
+            flex: 3;
+        }
+
+        .main .wrapper .panel {
+            border-color: #BCE8F1;
+        }
+
+        .main .wrapper .panel h3 {
+            background-color: #D9EDF7;
+            color: #31708F;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+{% include 'common/student_head.html' %}
+<div class="main">
+    <div class="wrapper">
+        <div class="left">
+            <button type="button" class="btn" id="choose-course">Course Selection Center</button>
+        </div>
+        <div class="right">
+            <div class="unstarted-course panel">
+                <h3 class="panel-title">Optional Course</h3>
+                <div class="panel-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Instructor</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Operation</th>
+                        </tr>
+                        </thead>
+                        <tbody id="no-start-course">
+                        <!-- 课程数据 -->
+                        </tbody>
+                    </table>
+                    <ul class="pagination" id="no-start-course-page">
+                        <!-- 分页导航 -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include 'common/change_password.html' %}
+    {% include 'common/pop_message.html' %}
+</div>
+<script src="/static/jquery-3.7.1.min.js"></script>
+<script src="/static/change_pwd.js"></script>
+<script>
+    $(document).ready(function () {
+        noStartCourse(1)
+
+        $('#no-start-course-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            noStartCourse($(this).attr('page'));
+        });
+
+        $('#no-start-course').on('click', 'button.btn-info', function () {
+            studentChoose($(this).attr('id_val'))
+        })
+
+        // 搜索
+        $('#search').on('click', function () {
+            noStartCourse(1)
+        });
+
+        // 关闭提示框
+        $('.close').click(function () {
+            $('#pop-message-dialog').addClass('hide');
+        });
+    });
+
+    function noStartCourse(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/course/select',
+            type: 'GET',
+            data: {'page': page, 'page_size': 2, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var courseList = response.data['course_list'];
+                    var pages = response.data['pages'];
+                    console.log(courseList)
+                    console.log(pages)
+                    // 更新课程列表
+                    var data_html = '';
+                    for (var i = 0; i < courseList.length; i++) {
+                        var course = courseList[i];
+                        data_html += '<tr>' +
+                            '<th scope="row">' + (i + 1) + '</th>' +
+                            '<td>' + course.course_name + '</td>' +
+                            '<td>' + course.username + '</td>' +
+                            '<td>' + course.start_date + '</td>' +
+                            '<td>' + course.end_date + '</td>' +
+                            '<td><button class="btn btn-info" ' + (course.status === 0 ? "disabled" : "") + ' id_val="' + course.id + '">Select</button></td>\n' +
+                            '</tr>';
+                    }
+                    $('#no-start-course').html(data_html);
+                    // 更新分页控制
+                    $('#no-start-course-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#no-start-course-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevNsc()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#no-start-course-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#no-start-course-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#no-start-course-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextNsc()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("Query Failure")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    function prevNsc() {
+        var page = $('#no-start-course-page .active').attr('page');
+        noStartCourse(parseInt(page) - 1);
+    }
+
+    function nextNsc() {
+        var page = $('#no-start-course-page .active').attr('page')
+        noStartCourse(parseInt(page) + 1);
+    }
+
+    // 学生选课
+    function studentChoose(id) {
+        $.ajax({
+            url: '/student-course/choose',
+            type: 'GET',
+            data: {'course_id': id},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    noStartCourse(1)
+                } else {
+                    $('#pop-message-dialog p').text(response.msg);
+                    $('#pop-message-dialog').removeClass("hide");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+</script>
+</body>
+</html>

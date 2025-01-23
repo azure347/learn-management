@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Coursework Submission Page</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/head.css">
+    <style>
+        .main {
+            padding-top: 20px;
+        }
+
+        .main .wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .main .wrapper .left {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .main .wrapper .right {
+            flex: 3;
+        }
+
+        .main .wrapper .left .up {
+            margin-bottom: 30px;
+        }
+
+        .main .wrapper .left .up button {
+            width: 100%;
+            height: 46px;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .operation-statistics {
+            border-color: #BCE8F1;
+        }
+
+        .operation-statistics h3 {
+            background-color: #D9EDF7;
+            color: #31708F;
+            text-align: center;
+        }
+
+        .operation-statistics .panel-body div {
+            width: 100%;
+            height: 54px;
+            background-color: #FCF8E3;
+            margin-bottom: 10px;
+            text-align: center;
+            line-height: 54px;
+        }
+
+        .operation-statistics .panel-body div a:hover {
+            text-decoration: underline;
+        }
+
+        .operation-statistics .panel-body div span {
+            padding: 3px 7px;
+            background-color: #777;
+            color: #fff;
+            font-size: 12px;
+            border-radius: 16px;
+        }
+
+        .coursework-list h3 {
+            text-align: center;
+        }
+
+        .stu-work-detail {
+            width: 580px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .stu-work-detail .dialog-body {
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            text-align: left;
+        }
+
+        .stu-work-detail .dialog-body .up {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .caption h3 {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .caption p {
+            margin-top: 10px;
+        }
+
+        .caption a {
+            display: block;
+            width: 240px;
+            text-align: center;
+            padding: 5px 0;
+        }
+
+        .ass-submit {
+            width: 400px;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+{% include 'common/student_head.html' %}
+<div class="main">
+
+    <div class="wrapper">
+        <div class="left">
+            <div class="up">
+                <button type="button" class="btn">{{ course_name }}</button>
+            </div>
+            <div class="down">
+                <div class="operation-statistics panel">
+                    <h3 class="panel-title">Operation Statistics</h3>
+                    <div class="panel-body">
+                        <div>
+                            <a href="#">To be Completed<span id="no-complete">0</span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right">
+            <div class="coursework-list panel">
+                <h3 class="panel-title">Coursework List</h3>
+                <div class="panel-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Requirements</th>
+                            <th>Deadline</th>
+                            <th>Operation</th>
+                        </tr>
+                        </thead>
+                        <tbody id="assignment-list">
+                        <!-- 课程数据 -->
+                        </tbody>
+                    </table>
+                    <ul class="pagination" id="assignment-list-page">
+                        <!-- 分页导航 -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="wrap-dialog hide" id="stu-work-detail-dialog">
+        <div class="stu-work-detail dialog">
+            <div class="dialog-header">
+                <span class="dialog-title">Coursework Details</span>
+            </div>
+            <div class="dialog-body">
+                <div class="up" id="ass-detail">
+                    <img src="" style="height: 200px; width: 100%; display: none;">
+                    <iframe src="" style="height: 200px; width: 100%; display: none;"></iframe>
+                    <div class="caption">
+                        <h3 id="ass-name"></h3>
+                        <p id="ass-requirement"></p>
+                        <p id="download"><a href="#" target="_blank" class="btn btn-default"
+                                            role="button">Download the Coursework Files</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <input type="button" class="btn cancel" value="Close"/>
+            </div>
+        </div>
+    </div>
+    <div class="wrap-dialog hide" id="ass-submit-dialog">
+        <div class="ass-submit dialog">
+            <div class="dialog-header">
+                <span class="dialog-title">Coursework File</span>
+            </div>
+            <div class="dialog-body">
+                <form class="assignment-form" id="assignment-form">
+                    <div class="input-box file-box">
+                        <label class="input-box-label" for="upload_file">作业文件</label>
+                        <span class="input-box-span file-box-span">
+                            <input type="file" class="input-box-span-input" id="upload_file" name="upload_file">
+                            <button type="button" class="btn" id="upload-file">上传</button>
+                            <div class="preview">
+
+                            </div>
+                        </span>
+                    </div>
+                    <input type="hidden" id="stu-ass-id" name="stu_ass_id">
+                    <input type="hidden" id="d-time" name="d_time">
+                    <input id="file_name" type="hidden" name="file_name">
+                </form>
+            </div>
+            <div class="dialog-footer">
+                <input type="button" class="btn submit" id="assignment-submit" value="Submit"/>
+                <input type="button" class="btn cancel" value="Close"/>
+            </div>
+        </div>
+    </div>
+    {% include 'common/change_password.html' %}
+    {% include 'common/pop_message.html' %}
+</div>
+<script src="/static/jquery-3.7.1.min.js"></script>
+<script src="/static/change_pwd.js"></script>
+<script src="/static/js/upload_file.js"></script>
+<script>
+    $(document).ready(function () {
+        assignmentList(1)
+        // 切换页码
+        $('#assignment-list-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            assignmentList($(this).attr('page'));
+        });
+
+        // 查看作业详情
+        $('#assignment-list').on('click', 'button.btn-default', function () {
+            $('#stu-work-detail-dialog').removeClass("hide");
+            id = $(this).attr('id_val');
+            $.ajax({
+                url: '/assignment/get',
+                type: 'GET',
+                data: {'id': id},
+                success: function (response) {
+                    //console.log(response)
+                    if (response.code === 200) {
+                        var ass = response.data['assignment'];
+                        console.log("result: ", ass)
+                        $('#ass-name').text(ass.assignment_name);
+                        $('#ass-requirement').text(ass.assignment_requirement);
+                        $('#ass-deadline-time').text(ass.submit_deadline_time)
+                        var file_name = ass.file_name
+                        if (file_name === null) {
+                            $('#ass-detail img').css('display', 'none')
+                            $('#ass-detail iframe').css('display', 'none')
+                            $('#download').hide();
+                        } else {
+                            $('#download').show();
+                            $('#download a').attr('href', 'http://127.0.0.1:8080/static/uploads/' + file_name);
+                            if (['png', 'jpg', 'jpeg'].includes(file_name.split('.')[1])) {
+                                $('#ass-detail img').css('display', 'block').attr('src', 'http://127.0.0.1:8080/static/uploads/' + file_name)
+                                $('#ass-detail iframe').css('display', 'none')
+                            } else {
+                                $('#ass-detail iframe').css('display', 'block').attr('src', 'http://127.0.0.1:8080/static/uploads/' + file_name)
+                                $('#ass-detail img').css('display', 'none')
+                            }
+                        }
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Request failed: ', status, error);
+                }
+            });
+        })
+
+        // 打开提交作业窗口
+        $('#assignment-list').on('click', 'button.btn-info', function () {
+            $('#ass-submit-dialog').removeClass("hide");
+            $('#stu-ass-id').val($(this).attr('id_val'))
+            $('#d-time').val($(this).attr('d_time'))
+            $('.preview').empty();
+            $('#file_name').val('')
+        })
+
+        // 提交作业
+        $('#assignment-submit').on('click', function () {
+            id = $('#stu-ass-id').val();
+            d_time = $('#d-time').val();
+            file_name = $('#file_name').val();
+            if (file_name === null || file_name === '') {
+                $('#pop-message-dialog p').text("Please upload the coursework File");
+                $('#pop-message-dialog').removeClass("hide");
+                return;
+            }
+            if (new Date(d_time) < new Date()) {
+                $('#pop-message-dialog p').text("The coursework is due and cannot be submitted.");
+                $('#pop-message-dialog').removeClass("hide");
+                return;
+            }
+            $.ajax({
+                url: '/student-assignment/submit',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({'id': id, 'file_name': file_name}),
+                success: function (response) {
+                    //console.log(response)
+                    if (response.code === 200) {
+                        $('#ass-submit-dialog').addClass("hide");
+                        assignmentList(1);
+                    } else {
+                        $('#pop-message-dialog p').text(response.msg);
+                        $('#pop-message-dialog').removeClass("hide");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Request failed: ', status, error);
+                }
+            });
+        })
+
+        // 搜索
+        $('#search').on('click', function () {
+            assignmentList(1)
+        });
+
+        $('#ass-submit-dialog .cancel').click(function () {
+            $('#ass-submit-dialog').addClass("hide");
+        });
+
+        $('#stu-work-detail-dialog .cancel').click(function () {
+            $('#stu-work-detail-dialog').addClass("hide");
+        });
+
+        // 关闭提示框
+        $('.close').click(function () {
+            $('#pop-message-dialog').addClass('hide');
+        });
+
+    });
+
+    // 列表分页查询
+    function assignmentList(page) {
+        var course_id = '{{ course_id }}';
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/student-assignment/unfinished-by-course',
+            type: 'GET',
+            data: {'page': page, 'page_size': 3, 'course_id': course_id, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var assList = response.data['assignment_list'];
+                    var pages = response.data['pages'];
+                    console.log(pages['total'])
+                    $('#no-complete').text(pages['total'])
+                    // 更新列表
+                    var data_html = '';
+                    for (var i = 0; i < assList.length; i++) {
+                        var ass = assList[i];
+                        data_html += '<tr>\n' +
+                            '<th scope="row">' + (i + 1) + '</th>\n' +
+                            '<td>' + ass.assignment_name + '</td>\n' +
+                            '<td>' + ((ass.assignment_requirement.length > 20) ? ass.assignment_requirement.substring(0, 20) + '...' : ass.assignment_requirement) + '</td>\n' +
+                            '<td>' + ass.submit_deadline_time + '</td>\n' +
+                            '<td>\n' +
+                            '    <button class="btn btn-default" id_val="' + ass.assignment_id + '">View</button>\n' +
+                            '    <button class="btn btn-info ' + (new Date(ass.submit_deadline_time) < new Date() ? "disabled" : "") + '" id_val="' + ass.id + '" d_time="' + ass.submit_deadline_time + '">Submit</button>\n' +
+                            '</td>\n' +
+                            '</tr>';
+                    }
+                    $('#assignment-list').html(data_html);
+                    // 更新分页控制
+                    $('#assignment-list-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#assignment-list-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prev()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#assignment-list-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#assignment-list-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#assignment-list-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:next()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("Query Failure")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    function prev() {
+        var page = $('#assignment-list-page .active').attr('page');
+        assignmentList(parseInt(page) - 1);
+    }
+
+    function next() {
+        var page = $('#assignment-list-page .active').attr('page')
+        assignmentList(parseInt(page) + 1);
+    }
+</script>
+</body>
+</html>

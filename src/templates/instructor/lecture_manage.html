@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lecture Management</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/head.css">
+    <style>
+        .main {
+            padding-top: 20px;
+        }
+
+        .main .wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .main .wrapper div {
+            flex: 1;
+        }
+
+        .main .wrapper .panel {
+            border-color: #BCE8F1;
+        }
+
+        .main .wrapper .panel h3 {
+            background-color: #D9EDF7;
+            color: #31708F;
+            text-align: center;
+        }
+
+        .main .wrapper .down {
+            margin-top: 30px;
+        }
+
+        .main .wrapper .down button {
+            width: 100%;
+            height: 46px;
+            font-size: 18px;
+        }
+
+        .lecture-edit {
+            width: 640px;
+            max-height: 600px;
+            overflow: auto;
+        }
+
+        .lecture-edit .dialog-body {
+            display: flex;
+        }
+
+        .lecture-edit .dialog-body .left {
+            flex: 1;
+            margin-right: 10px;
+            max-height: 460px;
+            overflow: auto;
+        }
+
+        .lecture-edit .dialog-body .right {
+            flex: 2;
+        }
+
+        .lecture-edit .dialog-body .right label {
+            text-align: right;
+        }
+
+        .lecture-form .content-box {
+            height: 80px;
+        }
+
+        .lecture-form .file-box {
+            height: 240px;
+        }
+    </style>
+</head>
+<body>
+{% include 'common/instructor_head.html' %}
+<div class="main">
+    <div class="wrapper">
+        <div>
+            <div class="up">
+                <div class="lecture-manage panel">
+                    <h3 class="panel-title">My Lecture</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Status</th>
+                                <th>Operation</th>
+                            </tr>
+                            </thead>
+                            <tbody id="lecture">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                        <ul class="pagination" id="lecture-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="down">
+                <button type="button" class="btn" id="lecture-add">Add Lecture</button>
+            </div>
+        </div>
+    </div>
+    <div class="wrap-dialog hide" id="lecture-edit-dialog">
+        <div class="lecture-edit dialog">
+            <div class="dialog-header">
+                <span class="dialog-title">Edit Lecture</span>
+            </div>
+            <div class="dialog-body">
+                <div class="left">
+                    <div class="user-list panel">
+                        <h3 class="panel-title">Select students to attend the lecture</h3>
+                        <div class="panel-body">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Students Name</th>
+                                    <th>Select</th>
+                                </tr>
+                                </thead>
+                                <tbody id="all-user">
+                                <!-- 课程数据 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="right">
+                    <form class="lecture-form" id="lecture-form">
+                        <div class="input-box">
+                            <label class="input-box-label" for="lecture-name">Title</label><span
+                                class="input-box-span"><input
+                                class="input-box-span-input" type="text" id="lecture-name"
+                                placeholder="Please Enter the Lecture Title..."
+                                name="lecture_name"></span>
+                        </div>
+                        <div class="input-box content-box">
+                            <label class="input-box-label" for="lecture-description">Description</label><span
+                                class="input-box-span content-box-span"><textarea
+                                class="input-box-span-input" id="lecture-description"
+                                placeholder="Please Enter the Lecture Description..."
+                                name="lecture_description"></textarea></span>
+                        </div>
+                        <div class="input-box">
+                            <label class="input-box-label" for="lecture-start-time">From</label><span
+                                class="input-box-span"><input
+                                class="input-box-span-input" type="datetime-local" id="lecture-start-time"
+                                placeholder="yy-mm-dd h:min"
+                                name="lecture_start_time"></span>
+                        </div>
+                        <div class="input-box">
+                            <label class="input-box-label" for="lecture-end-time">To</label><span
+                                class="input-box-span"><input
+                                class="input-box-span-input" type="datetime-local" id="lecture-end-time"
+                                placeholder="yy-mm-dd h:min"
+                                name="lecture_end_time"></span>
+                        </div>
+                        <div class="input-box file-box">
+                            <label class="input-box-label" for="upload_file">相关文件</label>
+                            <span class="input-box-span file-box-span">
+                            <input type="file" class="input-box-span-input" id="upload_file" name="upload_file">
+                            <button type="button" class="btn" id="upload-file">上传</button>
+                            <div class="preview">
+
+                            </div>
+                        </span>
+                        </div>
+                        <input type="hidden" id="lecture-id" name="lecture_id">
+                        <input id="file_name" type="hidden" name="file_name">
+                    </form>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <input type="button" class="btn submit" id="lecture-submit" value="Submit"/>
+                <input type="button" class="btn cancel" value="Close"/>
+            </div>
+        </div>
+    </div>
+    {% include 'common/change_password.html' %}
+    {% include 'common/pop_message.html' %}
+</div>
+<script src="/static/jquery-3.7.1.min.js"></script>
+<script src="/static/change_pwd.js"></script>
+<script src="/static/js/upload_file.js"></script>
+<script>
+    $(document).ready(function () {
+        lectureList(1)
+        getAllUser()
+        // 切换页码
+        $('#lecture-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            lectureList($(this).attr('page'));
+        });
+
+        // 打开修改窗口
+        $('#lecture').on('click', 'button.btn-success', function () {
+            $('#all-user input').each(function () {
+                $(this).prop('checked', false);
+            })
+            $('#upload_file').val('')
+            $('#lecture-edit-dialog').removeClass('hide')
+            $('#lecture-submit').attr('operation', 'update');
+            lecture($(this).attr('id_val'));
+        });
+
+        // 删除通知
+        $('#lecture').on('click', 'button.btn-danger', function () {
+            var id = $(this).attr('id_val');
+            console.log(id)
+            lectureDelete(id);
+        })
+
+        // 打开添加窗口
+        $('#lecture-add').on('click', function () {
+            getAllUser();
+            $('#lecture-edit-dialog').removeClass('hide')
+            $('#lecture-form input').val('');
+            $('#lecture-description').val('');
+            $('.preview').empty()
+            $('#lecture-submit').attr('operation', 'add');
+        })
+
+        $('#lecture-submit').on('click', function () {
+            var operation = $(this).attr('operation');
+            if (operation === 'add') {
+                // 添加
+                lectureAdd();
+            } else {
+                // 修改
+                lectureUpdate();
+            }
+        })
+
+        // 搜索
+        $('#search').on('click', function () {
+            lectureList(1)
+        });
+
+        $('#lecture-edit-dialog .cancel').click(function () {
+            $('#lecture-edit-dialog').addClass("hide");
+        });
+
+        // 关闭提示框
+        $('.close').click(function () {
+            $('#pop-message-dialog').addClass('hide');
+        });
+
+    });
+
+    // 讲座列表分页查询
+    function lectureList(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/lecture/my-lecture-list',
+            type: 'GET',
+            data: {'page': page, 'page_size': 3, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var lectureList = response.data['lecture_list'];
+                    var pages = response.data['pages'];
+                    // 更新列表
+                    var data_html = '';
+                    for (var i = 0; i < lectureList.length; i++) {
+                        var lecture = lectureList[i];
+                        data_html += '<tr>\n' +
+                            '<th scope="row">' + (i + 1) + '</th>\n' +
+                            '<td>' + lecture.lecture_name + '</td>\n' +
+                            '<td>' + ((lecture.lecture_description.length > 20) ? lecture.lecture_description.substring(0, 20) + '...' : lecture.lecture_description) + '</td>\n' +
+                            '<td>' + lecture.lecture_start_time + '</td>\n' +
+                            '<td>' + lecture.lecture_end_time + '</td>\n' +
+                            '<td>' + ((lecture.status === 1) ? "Pass" : "Fail") + '</td>\n' +
+                            '<td>\n' +
+                            '    <button class="btn btn-success" id_val="' + lecture.id + '">Edit</button>\n' +
+                            '    <button class="btn btn-danger" id_val="' + lecture.id + '">Delete</button>\n' +
+                            '</td>\n' +
+                            '</tr>';
+                    }
+                    $('#lecture').html(data_html);
+                    // 更新分页控制
+                    $('#lecture-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#lecture-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prev()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#lecture-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#lecture-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#lecture-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:next()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("Query Failure")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    function prev() {
+        var page = $('#lecture-page .active').attr('page');
+        lectureList(parseInt(page) - 1);
+    }
+
+    function next() {
+        var page = $('#lecture-page .active').attr('page')
+        lectureList(parseInt(page) + 1);
+    }
+
+    // 删除讲座
+    function lectureDelete(id) {
+        $.ajax({
+            url: '/lecture/delete',
+            type: 'GET',
+            data: {'id': id},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    lectureList(1)
+                } else {
+                    $('#pop-message-dialog p').text(response.msg);
+                    $('#pop-message-dialog').removeClass("hide");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    // 添加讲座
+    function lectureAdd() {
+        var user_list = [];
+        $('#all-user input[type="checkbox"]:checked').each(function () {
+            user_list.push($(this).val());
+        });
+        var lecture_name = $('#lecture-name').val();
+        var lecture_description = $('#lecture-description').val();
+        var lecture_start_time = $('#lecture-start-time').val();
+        var lecture_end_time = $('#lecture-end-time').val();
+        var file_name = $('#file_name').val();
+        console.log("----------", lecture_name, lecture_description, lecture_start_time, lecture_end_time, file_name)
+        if (lecture_name === '' || lecture_description === '' || lecture_start_time === '' || lecture_end_time === '' || file_name === '') {
+            $('#pop-message-dialog p').text("Please enter the full information");
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        if (new Date(lecture_start_time) < new Date()) {
+            $('#pop-message-dialog p').text("Lecture start time cannot be earlier than the current time.");
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        if (new Date(lecture_end_time) < new Date(lecture_start_time)) {
+            $('#pop-message-dialog p').text("The end time of the lecture cannot be earlier than the start time.");
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        if (user_list.length === 0) {
+            $('#pop-message-dialog p').text("The participating students list must not be empty.");
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        $.ajax({
+            url: '/lecture/add',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                'lecture_name': lecture_name,
+                'lecture_description': lecture_description,
+                'lecture_start_time': lecture_start_time,
+                'lecture_end_time': lecture_end_time,
+                'file_name': file_name,
+                'user_list': user_list
+            }),
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    $('#lecture-edit-dialog').addClass("hide");
+                    lectureList(1)
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    // 修改通知
+    function lectureUpdate() {
+        var user_list = [];
+        $('#all-user input[type="checkbox"]:checked').each(function () {
+            user_list.push($(this).val());
+        });
+        var lecture_id = $('#lecture-id').val();
+        var lecture_name = $('#lecture-name').val();
+        var lecture_description = $('#lecture-description').val();
+        var lecture_start_time = $('#lecture-start-time').val();
+        var lecture_end_time = $('#lecture-end-time').val();
+        var file_name = $('#file_name').val();
+        if (lecture_name === '' || lecture_description === '' || lecture_start_time === '' || lecture_end_time === '' || file_name === '') {
+            $('#pop-message-dialog p').text("Please enter the full information");
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        if (new Date(lecture_start_time) < new Date()) {
+            $('#pop-message-dialog p').text("Lecture start time cannot be earlier than the current time.");
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        if (new Date(lecture_end_time) < new Date(lecture_start_time)) {
+            $('#pop-message-dialog p').text("The end time of the lecture cannot be earlier than the start time.");
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        if (user_list.length === 0) {
+            $('#pop-message-dialog p').text("The participating students list must not be empty.");
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        $.ajax({
+            url: '/lecture/update',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                'id': lecture_id,
+                'lecture_name': lecture_name,
+                'lecture_description': lecture_description,
+                'lecture_start_time': lecture_start_time,
+                'lecture_end_time': lecture_end_time,
+                'file_name': file_name,
+                'user_list': user_list
+            }),
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    $('#lecture-edit-dialog').addClass("hide");
+                    lectureList(1)
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    // 获取用户列表
+    function getAllUser() {
+        $.ajax({
+            url: '/user/role-all',
+            type: 'GET',
+            data: {'role': 'student'},
+            success: function (response) {
+                if (response.code === 200) {
+                    var userList = response.data['users'];
+                    //console.log(userList)
+                    var data_html = '';
+                    for (var i = 0; i < userList.length; i++) {
+                        var user = userList[i];
+                        data_html += '<tr>\n' +
+                            '    <td>' + (i + 1) + '</td>\n' +
+                            '    <td>' + user.username + '</td>\n' +
+                            '    <td><input type="checkbox" name="ck' + i + '" value="' + user.id + '"></td>\n' +
+                            '</tr>'
+                    }
+                    $('#all-user').html(data_html);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+    // 通知编辑数据回显
+    function lecture(id) {
+        $.ajax({
+            url: '/lecture/get',
+            type: 'GET',
+            data: {'id': id},
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    var lecture = response.data['lecture'];
+                    var user_ids = response.data['user_ids'];
+                    console.log("lecture: ", lecture, "user_ids: ", user_ids)
+                    $('#lecture-id').val(lecture.id)
+                    $('#lecture-name').val(lecture.lecture_name);
+                    $('#lecture-description').val(lecture.lecture_description);
+                    $('#lecture-start-time').val(lecture.lecture_start_time);
+                    $('#lecture-end-time').val(lecture.lecture_end_time);
+                    $('#file_name').val(lecture.file_name)
+                    $('.preview').empty()
+                    if (lecture.file_name !== null && lecture.file_name !== '' && lecture.file_name !== undefined && lecture.file_name !== 'null') {
+                        var imgs = ['png', 'jpg', 'jpeg'];
+                        if (imgs.includes(lecture.file_name.split('.')[1])) {
+                            $('.preview').append(`<img src="http://127.0.0.1:8080/static/uploads/${lecture.file_name}" alt="Preview" width="100%" height="100%">`)
+                        } else if ('pdf' === lecture.file_name.split('.')[1]) {
+                            $('.preview').append(`<embed src="http://127.0.0.1:8080/static/uploads/${lecture.file_name}" width="100%" height="100%" type="application/pdf">`)
+                        } else {
+                            $('.preview').append(`<iframe src="http://127.0.0.1:8080/static/uploads/${lecture.file_name}" width="100%" height="100%"></iframe>`)
+                        }
+                    }
+                    $('#all-user input').each(function () {
+                        id = parseInt($(this).val())
+                        if (user_ids.includes(id)) {
+                            $(this).prop('checked', true)
+                        }
+                    });
+
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Request failed: ', status, error);
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

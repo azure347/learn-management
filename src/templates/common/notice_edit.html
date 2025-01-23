@@ -1,0 +1,64 @@
+<div class="wrap-dialog hide" id="notice-edit-dialog">
+    <div class="notice-edit-dialog dialog">
+        <div class="dialog-header">
+            <span class="dialog-title">通知编辑</span>
+        </div>
+        <div class="dialog-body">
+            <div class="left">
+                <div class="user-list panel">
+                    <h3 class="panel-title">通知可选用户列表</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>编号</th>
+                                <th>用户名</th>
+                                <th>选择</th>
+                            </tr>
+                            </thead>
+                            <tbody id="all-user">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="right">
+                <form class="notice-form" id="notice-form">
+                    <div class="input-box">
+                        <label class="input-box-label" for="notice_name">通知名称</label><span
+                            class="input-box-span"><input
+                            class="input-box-span-input" type="text" id="notice_name"
+                            placeholder="请输入通知名称"
+                            name="notice_name"></span>
+                    </div>
+                    <div class="input-box content-box">
+                        <label class="input-box-label" for="notice_content">通知内容</label><span
+                            class="input-box-span content-box-span"><textarea
+                            class="input-box-span-input" id="notice_content"
+                            placeholder="请输入通知内容"
+                            name="notice_content"></textarea></span>
+                    </div>
+                    <div class="input-box file-box">
+                        <label class="input-box-label" for="upload_file">相关文件</label>
+                        <span class="input-box-span file-box-span">
+                            <input type="file" class="input-box-span-input" id="upload_file" name="upload_file">
+                            <button type="button" class="btn" id="upload-file">上传</button>
+                            <div class="preview">
+
+<!--                                <img src="http://127.0.0.1:8080/static/uploads/a1c253564a15441c8da59f18e8008da7.jpeg"-->
+                                <!--                                     width="100%" height="100%" alt="">-->
+                            </div>
+                        </span>
+                    </div>
+                    <input type="hidden" id="notice_id" name="notice_id">
+                    <input id="file_name" type="hidden" name="file_name">
+                </form>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <input type="button" class="btn submit" id="notice-submit" value="提交"/>
+            <input type="button" class="btn cancel" value="关闭"/>
+        </div>
+    </div>
+</div>

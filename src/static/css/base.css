@@ -1,0 +1,331 @@
+/* 基础公共样式：清除默认样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+li {
+    list-style: none;
+}
+
+/* 设置通用样式 */
+body {
+    font: 14px/1.5 "Microsoft Yahei", "Hiragino Sans GB", "Heiti SC", "WenQuanYi Micro Hei", sans-serif;
+    color: #333;
+}
+
+a {
+    color: #333;
+    text-decoration: none;
+}
+
+/* 版心 */
+.wrapper {
+    margin: 0 auto;
+    width: 98%;
+}
+
+/* 面板 */
+.panel {
+    background-color: #fff;
+    border: 1px solid #337AB7;
+    border-radius: 4px;
+    box-shadow: 0px 1px 2px 0px rgba(211, 211, 211, 1);
+}
+
+/* 面板标题 */
+.panel-title {
+    padding: 0 20px;
+    background-color: #337AB7;
+    height: 40px;
+    line-height: 40px;
+    font-weight: 500;
+    color: #fff;
+}
+
+/* 面板内容 */
+.panel-body {
+    padding: 10px;
+}
+
+/* 表格 */
+.table {
+    border-collapse: collapse;
+    text-align: center;
+    width: 100%;
+}
+
+.table thead {
+    height: 56px;
+}
+
+.table tbody {
+    border-top: 2px solid #ddd;
+}
+
+.table tbody tr {
+    border-top: 1px solid #ddd;
+    height: 56px;
+}
+
+.table tbody tr:hover {
+    background-color: #F5F5F5;
+}
+
+/* 输入框 */
+.input-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    margin-bottom: 10px;
+}
+
+.input-box-label {
+    margin-right: 30px;
+    width: 75px;
+    font-size: 14px;
+    font-weight: bolder;
+}
+
+.input-box-span {
+    flex: 1;
+    height: 40px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.input-box-span-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    padding-left: 10px;
+}
+
+.content-box {
+    height: 120px;
+    align-items: flex-start;
+}
+
+.content-box-span {
+    height: 100%;
+}
+
+.content-box-span textarea {
+    padding: 10px;
+}
+
+.file-box {
+    height: 260px;
+    align-items: flex-start;
+}
+
+.file-box-span {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    border-color: #337ab7;
+}
+.file-box-span input {
+    height: 40px;
+    padding: 0;
+}
+.file-box-span button {
+    margin-bottom: 20px;
+}
+.file-box-span .preview {
+    width: 160px;
+    height: 160px;
+    padding: 2px;
+    border: 1px solid #ddd;
+}
+
+/* 按钮 */
+.btn {
+    width: 65px;
+    height: 34px;
+    font-weight: 400;
+    font-size: 14px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.btn:hover {
+    background-color: #E6E6E6;
+    cursor: pointer;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: default;
+}
+
+.btn-success {
+    background-color: #5CB85C;
+    border-color: #5CB85C;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #449D44;
+}
+
+.btn-danger {
+    background-color: #D9534F;
+    border-color: #D9534F;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #C9302C;
+}
+
+
+/* 分页 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 15px 0;
+}
+
+.pagination li {
+    margin-right: -1px;
+    width: 30px;
+    height: 30px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.pagination a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 4px 6px;
+    font-weight: 400;
+    color: #337ab7;
+    background-color: transparent;
+    text-align: center;
+}
+
+.pagination a:hover {
+    background-color: #E6E6E6;
+}
+
+.pagination .active {
+    background-color: #337ab7;
+}
+
+.pagination .active a {
+    color: #fff;
+}
+
+.pagination .active a:hover {
+    background-color: #337ab7;
+}
+
+/* 弹出窗口 */
+.wrap-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .4);
+    z-index: 999;
+}
+
+.dialog {
+    position: relative;
+    margin: 5% auto;
+    width: 300px;
+    background-color: #FFFFFF;
+    text-align: center;
+}
+
+.dialog .dialog-header {
+    height: 40px;
+    padding: 10px;
+    background-color: #D9EDF7;
+}
+
+.dialog .dialog-body {
+    padding: 20px;
+}
+
+.dialog .dialog-footer {
+    padding: 8px;
+    background-color: #F8F8F8;
+}
+
+.dialog .dialog-footer .submit {
+    background-color: #337AB7;
+    color: #fff;
+}
+
+.dialog .dialog-footer .submit:hover {
+    background-color: #286090;
+}
+
+.hide {
+    display: none;
+}
+
+/* 修改密码弹出窗 */
+.change-password {
+    width: 500px;
+}
+
+.change-password .input-box-label {
+    text-align: right;
+    width: 130px;
+}
+
+/* 错误提示弹出框 */
+.pop-message .dialog-header {
+    padding: 5px;
+    background-color: #fff;
+    font-size: 18px;
+    border-bottom: 1px solid #ddd;
+}
+
+.pop-message .dialog-header .close {
+    position: absolute;
+    top: 1px;
+    right: 5px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bolder;
+    color: #ccc;
+}
+
+.pop-message .dialog-header .close:hover {
+    color: #808080;
+}
+
+/* 通知编辑弹出窗 */
+.notice-edit-dialog {
+    width: 640px;
+    max-height: 600px;
+}
+
+.notice-edit-dialog .dialog-body {
+    display: flex;
+}
+
+.notice-edit-dialog .dialog-body .left {
+    flex: 1;
+    margin-right: 10px;
+    max-height: 460px;
+    overflow: auto;
+}
+
+.notice-edit-dialog .dialog-body .right {
+    flex: 2;
+}

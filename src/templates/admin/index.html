@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员首页</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/head.css">
+    <style>
+        .main {
+            padding-top: 20px;
+        }
+
+        .main .wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .main .wrapper .one {
+            flex: 1;
+        }
+
+        .main .wrapper .two {
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .main .wrapper .three {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .main .wrapper .four {
+            flex: 1;
+        }
+
+        .panel {
+            border-color: #BCE8F1;
+        }
+
+        .panel h3 {
+            background-color: #D9EDF7;
+            color: #31708F;
+            text-align: center;
+        }
+
+        .down {
+            margin-top: 30px;
+        }
+
+        .down a {
+            display: block;
+            width: 100%;
+            height: 46px;
+            font-size: 18px;
+            text-align: center;
+            line-height: 46px;
+        }
+    </style>
+</head>
+<body>
+{% include 'common/admin_head.html' %}
+<div class="main">
+    <div class="wrapper">
+        <div class="one">
+            <div class="up">
+                <div class="student panel">
+                    <h3 class="panel-title">学生列表</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>编号</th>
+                                <th>学生名称</th>
+                                <th>学号</th>
+                                <th>账号状态</th>
+                            </tr>
+                            </thead>
+                            <tbody id="student">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                        <ul class="pagination" id="student-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="down">
+                <a href="/user/admin/student-manage" class="btn">学生管理</a>
+            </div>
+        </div>
+        <div class="two">
+            <div class="up">
+                <div class="student-list panel">
+                    <h3 class="panel-title">教师列表</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>编号</th>
+                                    <th>教师名称</th>
+                                    <th>工号</th>
+                                    <th>账号状态</th>
+                            </tr>
+                            </thead>
+                            <tbody id="instructor">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                        <ul class="pagination" id="instructor-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="down">
+                <a href="/user/admin/instructor-manage" class="btn">教师管理</a>
+            </div>
+        </div>
+        <div class="three">
+            <div class="up">
+                <div class="student-list panel">
+                    <h3 class="panel-title">讲座列表</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>编号</th>
+                                    <th>讲座名称</th>
+                                    <th>讲师名称</th>
+                                    <th>开始时间</th>
+                                    <th>结束时间</th>
+                                    <th>状态</th>
+                            </tr>
+                            </thead>
+                            <tbody id="lecture">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                        <ul class="pagination" id="lecture-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="down">
+                <a href="/user/admin/lecture-manage" class="btn">讲座管理</a>
+            </div>
+        </div>
+        <div class="four">
+            <div class="up">
+                <div class="student-list panel">
+                    <h3 class="panel-title">通知列表</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>编号</th>
+                                    <th>通知名称</th>
+                                    <th>通知内容</th>
+                                    <th>通知类型</th>
+                                    <th>发起人</th>
+                            </tr>
+                            </thead>
+                            <tbody id="notice">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                        <ul class="pagination" id="notice-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="down">
+                <a href="/user/admin/notice-manage" class="btn">通知管理</a>
+            </div>
+        </div>
+    </div>
+    {% include 'common/change_password.html' %}
+    {% include 'common/pop_message.html' %}
+</div>
+<script src="/static/jquery-3.7.1.min.js"></script>
+<script src="/static/change_pwd.js"></script>
+<script>
+    $(document).ready(function () {
+        studentList(1)
+        instructorList(1)
+        lectureList(1)
+        noticelist(1)
+
+        // 学生列表切换页码
+        $('#student-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            studentList($(this).attr('page'));
+        });
+        // 教师列表切换页码
+        $('#instructor-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            instructorList($(this).attr('page'));
+        });
+        $('#lecture-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            lectureList($(this).attr('page'));
+        });
+        // 通知列表切换页码
+        $('#notice-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            noticelist($(this).attr('page'));
+        });
+
+        // 搜索
+        $('#search').on('click', function () {
+            studentList(1)
+            instructorList(1)
+            lectureList(1)
+            noticelist(1)
+        });
+
+        // 关闭提示框
+        $('.close').click(function () {
+            $('#pop-message-dialog').addClass('hide');
+        });
+    });
+
+    // 通知列表分页查询
+    function noticelist(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/notice/all',
+            type: 'GET',
+            data: {'page': page, 'page_size': 3, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var noticeList = response.data['notice_list'];
+                    var pages = response.data['pages'];
+                    console.log(noticeList)
+                    console.log(pages)
+                    // 更新通知列表
+                    var data_html = '';
+                    for (var i = 0; i < noticeList.length; i++) {
+                        var notice = noticeList[i];
+                        data_html += '<tr>\n' +
+                            '<th scope="row">' + (i + 1) + '</th>\n' +
+                            '<td>' + notice.notice_name + '</td>\n' +
+                            '<td>' + ((notice.notice_content.length > 5) ? notice.notice_content.substring(0, 5) + '...' : notice.notice_content) + '</td>\n' +
+                            '<td>' + ((notice.type === 1) ? "公共通知" : "专属通知") + '</td>\n' +
+                            '<td>' + notice.username + '</td>\n' +
+                            '</tr>';
+                    }
+                    $('#notice').html(data_html);
+                    // 更新分页控制
+                    $('#notice-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#notice-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevNt()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#notice-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#notice-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#notice-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextNt()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("查询失败")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    function prevNt() {
+        var page = $('#notice-page .active').attr('page');
+        noticelist(parseInt(page) - 1);
+    }
+
+    function nextNt() {
+        var page = $('#notice-page .active').attr('page')
+        noticelist(parseInt(page) + 1);
+    }
+
+    // 讲座列表分页查询
+    function lectureList(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/lecture/all',
+            type: 'GET',
+            data: {'page': page, 'page_size': 3, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var lectureList = response.data['lecture_list'];
+                    var pages = response.data['pages'];
+                    console.log(lectureList)
+                    console.log(pages)
+                    // 更新通知列表
+                    var data_html = '';
+                    for (var i = 0; i < lectureList.length; i++) {
+                        var lecture = lectureList[i];
+                        data_html += '<tr>\n' +
+                            '<th scope="row">' + (i + 1) + '</th>\n' +
+                            '<td>' + lecture.lecture_name + '</td>\n' +
+                            '<td>' + lecture.username + '</td>\n' +
+                            '<td>' + lecture.lecture_start_time + '</td>\n' +
+                            '<td>' + lecture.lecture_end_time + '</td>\n' +
+                            '<td>' + ((lecture.status === 1) ? "通过" : "未通过") + '</td>\n' +
+                            '</tr>';
+                    }
+                    $('#lecture').html(data_html);
+                    // 更新分页控制
+                    $('#lecture-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#lecture-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevLect()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#lecture-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#lecture-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#lecture-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextLect()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("查询失败")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    function prevLect() {
+        var page = $('#lecture-page .active').attr('page');
+        lectureList(parseInt(page) - 1);
+    }
+
+    function nextLect() {
+        var page = $('#lecture-page .active').attr('page')
+        lectureList(parseInt(page) + 1);
+    }
+
+    // 学生列表分页查询
+    function studentList(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/user/role',
+            type: 'GET',
+            data: {'page': page, 'page_size': 3, 'role': 'student', 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var userList = response.data['user_list'];
+                    var pages = response.data['pages'];
+                    console.log(userList)
+                    console.log(pages)
+                    // 更新列表
+                    var data_html = '';
+                    for (var i = 0; i < userList.length; i++) {
+                        var user = userList[i];
+                        data_html += '<tr>\n' +
+                            '<th scope="row">' + (i + 1) + '</th>\n' +
+                            '<td>' + user.username + '</td>\n' +
+                            '<td>' + user.number_id + '</td>\n' +
+                            '<td style="color: ' + ((user.status === 1) ? "green" : "red") + ';">' + ((user.status === 1) ? "正常" : "禁用") + '</td>\n' +
+                            '</tr>';
+                    }
+                    $('#student').html(data_html);
+                    // 更新分页控制
+                    $('#student-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#student-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevStu()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#student-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#student-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#student-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextStu()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("查询失败")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    function prevStu() {
+        var page = $('#student-page .active').attr('page');
+        studentList(parseInt(page) - 1);
+    }
+
+    function nextStu() {
+        var page = $('#student-page .active').attr('page')
+        studentList(parseInt(page) + 1);
+    }
+
+    // 教师列表分页查询
+    function instructorList(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/user/role',
+            type: 'GET',
+            data: {'page': page, 'page_size': 3, 'role': 'instructor', 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var userList = response.data['user_list'];
+                    var pages = response.data['pages'];
+                    console.log(userList)
+                    console.log(pages)
+                    // 更新列表
+                    var data_html = '';
+                    for (var i = 0; i < userList.length; i++) {
+                        var user = userList[i];
+                        data_html += '<tr>\n' +
+                            '<th scope="row">' + (i + 1) + '</th>\n' +
+                            '<td>' + user.username + '</td>\n' +
+                            '<td>' + user.number_id + '</td>\n' +
+                            '<td style="color: ' + ((user.status === 1) ? "green" : "red") + ';">' + ((user.status === 1) ? "正常" : "禁用") + '</td>\n' +
+                            '</tr>';
+                    }
+                    $('#instructor').html(data_html);
+                    // 更新分页控制
+                    $('#instructor-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#instructor-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevIns()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#instructor-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#instructor-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#instructor-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextIns()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("查询失败")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    function prevIns() {
+        var page = $('#instructor-page .active').attr('page');
+        instructorList(parseInt(page) - 1);
+    }
+
+    function nextIns() {
+        var page = $('#instructor-page .active').attr('page')
+        instructorList(parseInt(page) + 1);
+    }
+</script>
+</body>
+</html>

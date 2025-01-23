@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>讲座管理</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/head.css">
+    <style>
+        .main {
+            padding-top: 20px;
+        }
+
+        .main .wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+        .lecture-edit {
+            flex: 1;
+        }
+
+        .panel {
+            border-color: #BCE8F1;
+        }
+
+        .panel h3 {
+            background-color: #D9EDF7;
+            color: #31708F;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+{% include 'common/admin_head.html' %}
+<div class="main">
+    <div class="wrapper">
+        <div class="lecture-edit panel">
+            <h3 class="panel-title">讲座管理</h3>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>编号</th>
+                        <th>讲座名称</th>
+                        <th>讲座描述</th>
+                        <th>讲师名称</th>
+                        <th>开始时间</th>
+                        <th>结束时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="lecture">
+                    <!-- 课程数据 -->
+                    </tbody>
+                </table>
+                <ul class="pagination" id="lecture-page">
+                    <!-- 分页导航 -->
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% include 'common/change_password.html' %}
+    {% include 'common/pop_message.html' %}
+</div>
+<script src="/static/jquery-3.7.1.min.js"></script>
+<script src="/static/change_pwd.js"></script>
+<script>
+    $(document).ready(function () {
+        lectureList(1)
+
+        $('#lecture-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            lectureList($(this).attr('page'));
+        });
+
+        $('#lecture').on('click', 'button.btn-danger', function () {
+            var id = $(this).attr('id_val');
+            lectureDelete(id);
+        })
+
+        // 通过申请
+        $('#lecture').on('click', 'button.btn-success', function () {
+            var id = $(this).attr('id_val');
+            lecturePass(id);
+        })
+
+        // 搜索
+        $('#search').on('click', function () {
+            lectureList(1)
+        });
+
+        // 关闭提示框
+        $('.close').click(function () {
+            $('#pop-message-dialog').addClass('hide');
+        });
+    });
+
+    function lectureList(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/lecture/all',
+            type: 'GET',
+            data: {'page': page, 'page_size': 1, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var lectureList = response.data['lecture_list'];
+                    var pages = response.data['pages'];
+                    // 更新列表
+                    var data_html = '';
+                    for (var i = 0; i < lectureList.length; i++) {
+                        var lecture = lectureList[i];
+                        data_html += '<tr>\n' +
+                            '                                    <th scope="row">' + (i + 1) + '</th>\n' +
+                            '                                    <td>' + lecture.lecture_name + '</td>\n' +
+                            '                                    <td>' + lecture.lecture_description + '</td>\n' +
+                            '                                    <td>' + lecture.username + '</td>\n' +
+                            '                                    <td>' + lecture.lecture_start_time + '</td>\n' +
+                            '                                    <td>' + lecture.lecture_end_time + '</td>\n' +
+                            '                                    <td>\n' +
+                            '                                        <button class="btn btn-success" ' + (lecture.status == 1 ? "disabled" : "") + ' id_val="' + lecture.id + '">通过</button>\n' +
+                            '                                        <button class="btn btn-danger" id_val="' + lecture.id + '">删除</button>\n' +
+                            '                                    </td>\n' +
+                            '                                </tr>';
+                    }
+                    $('#lecture').html(data_html);
+                    // 更新分页控制
+                    $('#lecture-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#lecture-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prev()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#lecture-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#lecture-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#lecture-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:next()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("查询失败")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    function prev() {
+        var page = $('#lecture-page .active').attr('page');
+        lectureList(parseInt(page) - 1);
+    }
+
+    function next() {
+        var page = $('#lecture-page .active').attr('page')
+        lectureList(parseInt(page) + 1);
+    }
+
+    function lecturePass(id) {
+        $.ajax({
+            url: '/lecture/apply',
+            type: 'GET',
+            data: {'id': id},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    lectureList(1)
+                } else {
+                    $('#pop-message-dialog p').text(response.msg);
+                    $('#pop-message-dialog').removeClass("hide");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    function lectureDelete(id) {
+        $.ajax({
+            url: '/lecture/delete',
+            type: 'GET',
+            data: {'id': id},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    lectureList(1)
+                } else {
+                    $('#pop-message-dialog p').text(response.msg);
+                    $('#pop-message-dialog').removeClass("hide");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+</script>
+</body>
+</html>

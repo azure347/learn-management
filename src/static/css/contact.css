@@ -1,0 +1,92 @@
+.main .wrapper .left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-right: 20px;
+}
+
+.main .wrapper .left button {
+    width: 100%;
+    height: 46px;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.main .wrapper .right {
+    flex: 3;
+    max-height: 560px;
+    overflow-y: auto;
+}
+
+.main .wrapper .right .panel {
+    border-color: #BCE8F1;
+}
+
+.main .wrapper .right .panel h3 {
+    background-color: #D9EDF7;
+    color: #31708F;
+    text-align: center;
+}
+
+.main .wrapper .right .panel .panel-body {
+    padding: 0;
+}
+
+.main .wrapper .right ul li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    border-bottom: 1px solid #DDD;
+}
+
+.main .wrapper .right ul li div {
+    padding: 10px 0;
+}
+
+.main .wrapper .right ul li .left-div {
+    flex: 5;
+    text-align: left;
+}
+
+.main .wrapper .right ul li .center-div {
+    flex: 2;
+    text-align: center;
+}
+
+.main .wrapper .right ul li .right-div {
+    flex: 5;
+    text-align: right;
+}
+
+.main .wrapper .right form {
+    padding: 10px 50px;
+}
+.main .wrapper .right form span {
+    display: block;
+    height: 80px;
+}
+.main .wrapper .right form button {
+    position: relative;
+    left: 93%;
+}
+
+.chat-message {
+    background-color: #5cb85c;
+    display: inline-block;
+    border: 1px solid green;
+    border-radius: 5px;
+    padding: 3px;
+    vertical-align: middle;
+}
+
+.chat-message-time {
+    background-color: #777;
+    color: #FFF;
+    display: inline-block;
+    border: 1px solid #777;
+    border-radius: 4px;
+    padding: 3px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 10px;
+}

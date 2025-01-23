@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>教师管理</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/head.css">
+    <style>
+        .main {
+            padding-top: 20px;
+        }
+
+        .main .wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .main .wrapper .left {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .main .wrapper .right {
+            flex: 1;
+        }
+
+        .main .wrapper .panel {
+            border-color: #BCE8F1;
+        }
+
+        .main .wrapper .panel h3 {
+            background-color: #D9EDF7;
+            color: #31708F;
+            text-align: center;
+        }
+
+        .down {
+            margin-top: 30px;
+        }
+
+        .down button {
+            width: 100%;
+            height: 46px;
+            font-size: 18px;
+        }
+
+        .instructor-edit {
+            width: 500px;
+        }
+
+        .instructor-edit .ins_status {
+            text-align: left;
+            margin-left: 105px;
+        }
+
+        .instructor-edit .ins_status label {
+            margin-right: 20px;
+        }
+
+        .course-edit {
+            width: 600px;
+        }
+    </style>
+</head>
+<body>
+{% include 'common/admin_head.html' %}
+<div class="main">
+    <div class="wrapper">
+        <div class="left">
+            <div class="up">
+                <div class="student-list panel">
+                    <h3 class="panel-title">教师管理</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>编号</th>
+                                <th>教师名称</th>
+                                <th>教师工号</th>
+                                <th>创建时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="instructor">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                        <ul class="pagination" id="instructor-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="down">
+                <button type="button" class="btn" id="instructor-add">添加教师</button>
+            </div>
+        </div>
+        <div class="right">
+            <div class="up">
+                <div class="student-list panel">
+                    <h3 class="panel-title">课程管理</h3>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>编号</th>
+                                <th>课程名称</th>
+                                <th>课程教师</th>
+                                <th>课程描述</th>
+                                <th>开课日期</th>
+                                <th>结课日期</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="course">
+                            <!-- 课程数据 -->
+                            </tbody>
+                        </table>
+                        <ul class="pagination" id="course-page">
+                            <!-- 分页导航 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="down">
+                <button type="button" class="btn" id="course-add">添加课程</button>
+            </div>
+        </div>
+    </div>
+    <div class="wrap-dialog hide" id="instructor-edit-dialog">
+        <div class="instructor-edit dialog">
+            <div class="dialog-body">
+                <form class="student-form" id="instructor-form">
+                    <div class="input-box">
+                        <label class="input-box-label" for="instructor_name">教师名称</label><span
+                            class="input-box-span"><input
+                            class="input-box-span-input" type="text" id="instructor_name"
+                            placeholder="请输入教师名称"
+                            name="instructor_name"></span>
+                    </div>
+                    <div class="input-box">
+                        <label class="input-box-label" for="instructor_num_id">教师工号</label><span
+                            class="input-box-span"><input
+                            class="input-box-span-input" type="text" id="instructor_num_id"
+                            placeholder="请输入教师工号"
+                            name="instructor_num_id"></span>
+                    </div>
+                    <div class="ins_status">
+                        <input type="radio" name="instructor_status" id="radio1" value="1" checked> <label
+                            for="radio1">正常</label>
+                        <input type="radio" name="instructor_status" id="radio2" value="0"><label
+                            for="radio2">禁用</label>
+                    </div>
+                    <input type="hidden" id="instructor_id" name="instructor_id">
+                </form>
+            </div>
+            <div class="dialog-footer">
+                <input type="button" class="btn submit" id="instructor-submit" value="提交"/>
+                <input type="button" class="btn cancel" value="关闭"/>
+            </div>
+        </div>
+    </div>
+    <div class="wrap-dialog hide" id="course-edit-dialog">
+        <div class="course-edit dialog">
+            <div class="dialog-body">
+                <form class="student-form" id="course-form">
+                    <div class="input-box">
+                        <label class="input-box-label" for="course-name">课程名称</label><span
+                            class="input-box-span"><input
+                            class="input-box-span-input" type="text" id="course-name"
+                            placeholder="请输入课程名称"
+                            name="course_name"></span>
+                    </div>
+                    <div class="input-box">
+                        <label class="input-box-label" for="course-description">课程描述</label><span
+                            class="input-box-span"><textarea placeholder="请输入课程描述"
+                            class="input-box-span-input" id="course-description"
+                            name="course_description"></textarea></span>
+                    </div>
+                    <div class="input-box">
+                        <label class="input-box-label" for="course-instructor">课程教师</label><span
+                            class="input-box-span"><select
+                            class="input-box-span-input" id="course-instructor"
+                    ></select></span>
+                    </div>
+                    <div class="input-box">
+                        <label class="input-box-label" for="course-start-date">开课日期</label><span
+                            class="input-box-span"><input
+                            class="input-box-span-input" type="date" id="course-start-date"
+                            placeholder="年-月-日"
+                            name="course_start_date"></span>
+                    </div>
+                    <div class="input-box">
+                        <label class="input-box-label" for="course-end-date">结课日期</label><span
+                            class="input-box-span"><input
+                            class="input-box-span-input" type="date" id="course-end-date"
+                            placeholder="年-月-日"
+                            name="course_end_date"></span>
+                    </div>
+                    <input type="hidden" id="course-id" name="course_id">
+                </form>
+            </div>
+            <div class="dialog-footer">
+                <input type="button" class="btn submit" id="course-submit" value="提交"/>
+                <input type="button" class="btn cancel" value="关闭"/>
+            </div>
+        </div>
+    </div>
+    {% include 'common/change_password.html' %}
+    {% include 'common/pop_message.html' %}
+</div>
+<script src="/static/jquery-3.7.1.min.js"></script>
+<script src="/static/change_pwd.js"></script>
+<script>
+    $(document).ready(function () {
+        instructorList(1)
+        courseList(1)
+        getAllInstructor()
+
+        // 教师列表切换页码
+        $('#instructor-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            instructorList($(this).attr('page'));
+        });
+        // 课程列表切换页码
+        $('#course-page').on('click', 'li:not(.active, .disabled, .pp)', function () {
+            courseList($(this).attr('page'));
+        });
+
+        // 打开修改教师窗口
+        $('#instructor').on('click', 'button.btn-success', function () {
+            $('#instructor-edit-dialog').removeClass('hide');
+            var id = $(this).attr('id_val')
+            $('#instructor-submit').attr('operation', 'update');
+            getInstructor(id);
+        });
+
+        // 删除教师
+        $('#instructor').on('click', 'button.btn-danger', function () {
+            var id = $(this).attr('id_val');
+            console.log(id)
+            instructorDelete(id);
+        })
+
+        // 打开添加教师窗口
+        $('#instructor-add').on('click', function () {
+            $('#instructor-edit-dialog').removeClass('hide');
+            $('#instructor_name').val('')
+            $('#instructor_num_id').val('')
+            $('#instructor_id').val('')
+            $('#radio1').prop('checked', true)
+            $('#instructor-submit').attr('operation', 'add');
+        })
+
+        $('#instructor-submit').on('click', function () {
+            var operation = $(this).attr('operation');
+            if (operation === 'add') {
+                // 添加教师
+                instructorAdd();
+            } else {
+                // 修改教师
+                instructorUpdate();
+            }
+            $('#instructor-edit-dialog').addClass('hide');
+        })
+
+        // 打开添加课程窗口
+        $('#course-add').on('click', function () {
+            getAllInstructor()
+            $('#course-edit-dialog').removeClass('hide');
+            $('#course-id').val('')
+            $('#course-name').val('')
+            $('#course-instructor').val('')
+            $('#course-description').val('')
+            $('#course-start-date').val('')
+            $('#course-end-date').val('')
+            $('#course-submit').attr('operation', 'add');
+        })
+
+        $('#course-submit').on('click', function () {
+            var operation = $(this).attr('operation');
+            if (operation === 'add') {
+                // 添加通知
+                courseAdd();
+            } else {
+                // 修改通知
+                courseUpdate();
+            }
+        })
+
+        // 打开修改课程窗口
+        $('#course').on('click', 'button.btn-success', function () {
+            $('#course-edit-dialog').removeClass('hide');
+            $('#course-submit').attr('operation', 'update');
+            course($(this).attr('id_val'));
+        });
+
+        // 删除课程
+        $('#course').on('click', 'button.btn-danger', function () {
+            var id = $(this).attr('id_val');
+            console.log(id)
+            courseDelete(id);
+        })
+
+        // 搜索
+        $('#search').on('click', function () {
+            instructorList(1)
+            courseList(1)
+        });
+
+        $('#instructor-edit-dialog .cancel').click(function () {
+            $('#instructor-edit-dialog').addClass("hide");
+        });
+
+        $('#course-edit-dialog .cancel').click(function () {
+            $('#course-edit-dialog').addClass("hide");
+        });
+
+        // 关闭提示框
+        $('.close').click(function () {
+            $('#pop-message-dialog').addClass('hide');
+        });
+    });
+
+    // 教师列表分页查询
+    function instructorList(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/user/role',
+            type: 'GET',
+            data: {'page': page, 'page_size': 3, 'role': 'instructor', 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var userList = response.data['user_list'];
+                    var pages = response.data['pages'];
+                    console.log(userList)
+                    console.log(pages)
+                    // 更新列表
+                    var data_html = '';
+                    for (var i = 0; i < userList.length; i++) {
+                        var user = userList[i];
+                        data_html += '<tr>\n' +
+                            '    <th scope="row">' + (i + 1) + '</th>\n' +
+                            '    <td>' + user.username + '</td>\n' +
+                            '    <td>' + user.number_id + '</td>\n' +
+                            '    <td>' + user.create_time + '</td>\n' +
+                            '<td style="color: ' + ((user.status === 1) ? "green" : "red") + ';">' + ((user.status === 1) ? "正常" : "禁用") + '</td>\n' +
+                            '    <td>\n' +
+                            '        <button class="btn btn-success" id_val="' + user.id + '">修改</button>\n' +
+                            '        <button class="btn btn-danger" id_val="' + user.id + '">删除</button>\n' +
+                            '    </td>\n' +
+                            '</tr>';
+                    }
+                    $('#instructor').html(data_html);
+                    // 更新分页控制
+                    $('#instructor-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#instructor-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevInstr()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#instructor-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#instructor-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#instructor-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextInstr()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("查询失败")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    function prevInstr() {
+        var page = $('#instructor-page .active').attr('page');
+        instructorList(parseInt(page) - 1);
+    }
+
+    function nextInstr() {
+        var page = $('#instructor-page .active').attr('page')
+        instructorList(parseInt(page) + 1);
+    }
+
+    // 教师详情
+    function getInstructor(id) {
+        $.ajax({
+            url: '/user/get',
+            type: 'GET',
+            data: {'id': id},
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    var user = response.data['user'];
+                    $('#instructor_id').val(user.id)
+                    $('#instructor_name').val(user.username);
+                    $('#instructor_num_id').val(user.number_id);
+                    if (user.status === 1) {
+                        $('#radio1').prop('checked', true)
+                    } else {
+                        $('#radio2').prop('checked', true)
+                    }
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    // 删除教师
+    function instructorDelete(id) {
+        $.ajax({
+            url: '/user/delete',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({'id': id}),
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    instructorList(1)
+                } else {
+                    $('#pop-message-dialog p').text(response.msg);
+                    $('#pop-message-dialog').removeClass("hide");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    // 添加教师
+    function instructorAdd() {
+        var instructor_name = $('#instructor_name').val();
+        var instructor_num_id = $('#instructor_num_id').val();
+        var instructor_status = 1
+        if ($('#radio1').is(':checked')) {
+            instructor_status = 1
+        } else {
+            instructor_status = 0
+        }
+
+        $.ajax({
+            url: '/user/add',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                'username': instructor_name,
+                'role': 'instructor',
+                'number_id': instructor_num_id,
+                'status': instructor_status
+            }),
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    instructorList(1)
+                } else {
+                    console.log("添加失败")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    // 修改教师
+    function instructorUpdate() {
+
+        var instructor_id = $('#instructor_id').val();
+        var instructor_name = $('#instructor_name').val();
+        var instructor_num_id = $('#instructor_num_id').val();
+        var instructor_status = 1
+        if ($('#radio1').is(':checked')) {
+            instructor_status = 1
+        } else {
+            instructor_status = 0
+        }
+        $.ajax({
+            url: '/user/update',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                'id': instructor_id,
+                'username': instructor_name,
+                'role': 'instructor',
+                'number_id': instructor_num_id,
+                'status': instructor_status,
+            }),
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    instructorList(1)
+                } else {
+                    console.log("修改失败")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    // 获取教师列表
+    function getAllInstructor() {
+        $.ajax({
+            url: '/user/role-all',
+            type: 'GET',
+            data: {'role': 'instructor'},
+            success: function (response) {
+                if (response.code === 200) {
+                    var userList = response.data['users'];
+                    //console.log(userList)
+                    $('#course-instructor').empty(); // 清空原有的选项
+                    $('#course-instructor').append('<option value="">请选择教师</option>'); // 添加默认选项
+                    $.each(userList, function (index, user) {
+                        $('#course-instructor').append('<option value="' + user.id + '">' + user.username + '</option>')
+                    })
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    // 课程列表分页查询
+    function courseList(page) {
+        var search = $('#search-input').val();
+        $.ajax({
+            url: '/course/all',
+            type: 'GET',
+            data: {'page': page, 'page_size': 3, 'search': search},
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    var courseList = response.data['course_list'];
+                    var pages = response.data['pages'];
+                    console.log(courseList)
+                    console.log(pages)
+                    // 更新课程列表
+                    var data_html = '';
+                    for (var i = 0; i < courseList.length; i++) {
+                        var course = courseList[i];
+                        data_html += '<tr>\n' +
+                            '<th scope="row">' + (i + 1) + '</th>\n' +
+                            '<td>' + course.course_name + '</td>\n' +
+                            '<td>' + course.username + '</td>\n' +
+                            '<td>' + ((course.course_description.length > 10) ? course.course_description.substring(0, 10) + '...' : course.course_description) + '</td>\n' +
+                            '<td>' + course.start_date + '</td>\n' +
+                            '<td>' + course.end_date + '</td>\n' +
+                            '<td>\n' +
+                            '    <button class="btn btn-success" id_val="' + course.id + '">修改</button>\n' +
+                            '    <button class="btn btn-danger" id_val="' + course.id + '">删除</button>\n' +
+                            '</td>\n' +
+                            '</tr>';
+                    }
+                    $('#course').html(data_html);
+                    // 更新分页控制
+                    $('#course-page').empty()
+                    if (pages.is_prev === 1) {
+                        $('#course-page').append('<li class="pp">\n' +
+                            '<a href="javascript:prevCs()" aria-label="Previous">\n' +
+                            '    <span aria-hidden="true">&laquo;</span>\n' +
+                            '</a>\n' +
+                            '</li>')
+                    }
+                    for (var i = 0; i < pages.range.length; i++) {
+                        if (pages.current === pages.range[i]) {
+                            $('<li>').attr('page', pages.range[i]).addClass('active').append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#course-page')
+                        } else {
+                            $('<li>').attr('page', pages.range[i]).append(
+                                $('<a>').attr('href', '#').text(pages.range[i])).appendTo('#course-page')
+                        }
+                    }
+                    if (pages.is_next === 1) {
+                        $('#course-page').append(
+                            '<li class="pp">\n' +
+                            '    <a href="javascript:nextCs()" aria-label="Next">\n' +
+                            '        <span aria-hidden="true">&raquo;</span>\n' +
+                            '    </a>\n' +
+                            '</li>'
+                        )
+                    }
+                } else {
+                    console.log("查询失败")
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    function prevCs() {
+        var page = $('#course-page .active').attr('page');
+        courseList(parseInt(page) - 1);
+    }
+
+    function nextCs() {
+        var page = $('#course-page .active').attr('page')
+        courseList(parseInt(page) + 1);
+    }
+
+    // 删除课程
+    function courseDelete(id) {
+        $.ajax({
+            url: '/course/delete',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({'id': id}),
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    courseList(1)
+                } else {
+                    $('#pop-message-dialog p').text(response.msg);
+                    $('#pop-message-dialog').removeClass("hide");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    // 添加课程
+    function courseAdd() {
+        var course_name = $('#course-name').val();
+        var course_description = $('#course-description').val();
+        var course_instructor = $('#course-instructor').val();
+        var course_start_date = $('#course-start-date').val();
+        var course_end_date = $('#course-end-date').val();
+        if (course_name === '' || course_description === '' || course_instructor === '' || course_start_date === '' || course_end_date === '') {
+            $('#pop-message-dialog p').text('请输入完整信息');
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        if (new Date(course_start_date) < new Date()) {
+            $('#pop-message-dialog p').text('开课日期不能早于当前日期');
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        if (new Date(course_end_date) < new Date(course_start_date)) {
+            $('#pop-message-dialog p').text('结课日期不能早于开课日期');
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        $.ajax({
+            url: '/course/add',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                'course_name': course_name,
+                'course_description': course_description,
+                'instructor_id': course_instructor,
+                'start_date': course_start_date,
+                'end_date': course_end_date
+            }),
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    $('#course-edit-dialog').addClass('hide');
+                    courseList(1)
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    // 修改课程
+    function courseUpdate() {
+
+        var course_id = $('#course-id').val();
+        var course_name = $('#course-name').val();
+        var course_description = $('#course-description').val();
+        var course_instructor = $('#course-instructor').val();
+        var course_start_date = $('#course-start-date').val();
+        var course_end_date = $('#course-end-date').val();
+        if (course_name === '' || course_description === '' || course_instructor === '' || course_start_date === '' || course_end_date === '') {
+            $('#pop-message-dialog p').text('请输入完整信息');
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        if (new Date(course_start_date) < new Date()) {
+            $('#pop-message-dialog p').text('开课日期不能早于当前日期');
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        if (new Date(course_end_date) < new Date(course_start_date)) {
+            $('#pop-message-dialog p').text('结课日期不能早于开课日期');
+            $('#pop-message-dialog').removeClass("hide");
+            return;
+        }
+        console.log("id", course_id)
+        $.ajax({
+            url: '/course/update',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                'id': course_id,
+                'course_name': course_name,
+                'course_description': course_description,
+                'instructor_id': course_instructor,
+                'start_date': course_start_date,
+                'end_date': course_end_date
+            }),
+            success: function (response) {
+                console.log(response)
+                if (response.code === 200) {
+                    $('#course-edit-dialog').addClass('hide');
+                    courseList(1)
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+    // 课程详情
+    function course(id) {
+        $.ajax({
+            url: '/course/get',
+            type: 'GET',
+            data: {'id': id},
+            success: function (response) {
+                //console.log(response)
+                if (response.code === 200) {
+                    var course = response.data['course'];
+                    $('#course-id').val(course.id);
+                    $('#course-name').val(course.course_name);
+                    $('#course-description').val(course.course_description);
+                    $('#course-instructor').val(course.instructor_id);
+                    $('#course-start-date').val(course.start_date);
+                    $('#course-end-date').val(course.end_date);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('请求失败: ', status, error);
+            }
+        });
+    }
+
+</script>
+</body>
+</html>
